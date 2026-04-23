@@ -1,56 +1,78 @@
-# Welcome to your Expo app 👋
+# 🍎 Alimenta ReNova
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+O **Alimenta ReNova** é uma aplicação móvel focada na gestão inteligente do consumo e stock de produtos naturais. Este projeto está a ser desenvolvido como parte da trajetória académica no curso de **Sistemas de Informação** na **Universidade Federal do Rio Grande (FURG)**.
 
-## Get started
+A proposta é oferecer uma interface intuitiva para monitorização de validade, histórico de compras e preferências de consumo, facilitando a organização de quem busca uma alimentação natural.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🚀 Tecnologias Utilizadas
 
-2. Start the app
+Este projeto utiliza tecnologias modernas para o desenvolvimento de aplicações multiplataforma:
 
-   ```bash
-   npx expo start
-   ```
+* **[React Native](https://reactnative.dev/):** Framework para a interface nativa.
+* **[Expo](https://expo.dev/):** Plataforma para desenvolvimento e execução da aplicação.
+* **[Expo Router](https://expo.github.io/router/):** Navegação baseada em ficheiros (File-based Routing).
+* **[TypeScript](https://www.typescriptlang.org/):** Tipagem estática para maior segurança no desenvolvimento.
+* **[Ionicons/Feather Icons](https://icons.expo.fyi/):** Bibliotecas de ícones vetoriais.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🏗️ Estrutura de Pastas
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Com base na arquitetura atual do projeto:
 
-## Get a fresh project
+```text
+RENOVA/
+ ├── assets/             # Imagens e fontes do projeto
+ ├── src/
+ │    ├── app/           # Sistema de Rotas (Expo Router)
+ │    │    ├── (tabs)/   # Grupo de Abas (Navegação Inferior)
+ │    │    │    ├── alerts.tsx    (Alarmes)
+ │    │    │    ├── cart.tsx      (Carrinho)
+ │    │    │    ├── history.tsx   (Histórico)
+ │    │    │    ├── index.tsx     (Início)
+ │    │    │    ├── profile.tsx   (Perfil)
+ │    │    │    └── _layout.tsx   (Configuração das Tabs)
+ │    │    ├── login.tsx          (Tela de Acesso)
+ │    │    ├── personal-data.tsx  (Dados do Usuário)
+ │    │    ├── settings.tsx       (Configurações)
+ │    │    └── _layout.tsx        (Configuração Raiz/Stack)
+ │    ├── components/    # Componentes reutilizáveis (UI, Menu, etc.)
+ │    ├── constants/     # Definições de Temas e Cores
+ │    └── hooks/         # Lógicas e Hooks personalizados
+ ├── package.json        # Dependências e scripts
+ └── README.md           # Documentação do projeto
 
-When you're ready, run:
+````
+---
 
-```bash
-npm run reset-project
-```
+## 📋 Funcionalidades Atuais
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+[x] Navegação Dinâmica: Sistema de abas (Tabs) e pilhas (Stack) com Expo Router.
 
-### Other setup steps
+[x] Interface Adaptativa: Design moderno com suporte a Light/Dark Mode via constants/theme.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+[x] Componentização: Uso de componentes reutilizáveis para garantir a consistência visual.
 
-## Learn more
+[x] Lógica de Acesso: Fluxo de redirecionamento para login ao aceder a áreas restritas.
 
-To learn more about developing your project with Expo, look at the following resources:
+[ ] Persistência de Dados: Integração com base de dados (Planeado para as próximas etapas).
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+## 🛠️ Como Executar o Projeto
 
-Join our community of developers creating universal apps.
+Clonar o repositório:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Bash
+git clone [https://github.com/teu-usuario/renova.git](https://github.com/teu-usuario/renova.git)
+Instalar as dependências:
+
+Bash
+npm install
+Iniciar o ambiente Expo:
+
+Bash
+npx expo start -c
+Utilize o QR Code no app Expo Go para testar no seu dispositivo físico.
