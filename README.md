@@ -1,8 +1,8 @@
-# 🍎 Alimenta ReNova
+# 🍎 Ecommerce App
 
-O **Alimenta ReNova** é uma aplicação móvel focada na gestão inteligente do consumo e stock de produtos naturais. Este projeto está a ser desenvolvido como parte da trajetória académica no curso de **Sistemas de Informação** na **Universidade Federal do Rio Grande (FURG)**.
+O **Ecommerce App** é uma aplicação móvel focada na gestão inteligente do consumo e stock de produtos naturais. Este projeto está a ser desenvolvido como parte da trajetória académica.
 
-A proposta é oferecer uma interface intuitiva para monitorização de validade, histórico de compras e preferências de consumo, facilitando a organização de quem busca uma alimentação natural.
+A proposta é oferecer uma interface intuitiva para monitorização de validade, histórico de compras e preferências de consumo, facilitando a organização de quem busca uma compra online.
 
 ---
 
