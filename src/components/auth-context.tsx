@@ -100,9 +100,12 @@ type AuthContextValue = {
   isLoading: boolean;
   signIn: (role: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
+  themeMode: "light" | "dark";
+  toggleThemeMode: () => Promise<void>;
 };
 
 const AUTH_STORAGE_KEY = "@renova:auth-role";
+const THEME_STORAGE_KEY = "@renova:theme-mode";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -110,15 +113,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<UserRole | null>(null);
   const [user, setUser] = useState<MockAccount | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const loadRole = async () => {
       try {
         const storedRole = await storageGetItem(AUTH_STORAGE_KEY);
+        const storedTheme = await storageGetItem(THEME_STORAGE_KEY);
 
         if (storedRole === "user" || storedRole === "admin") {
           setRole(storedRole);
           setUser(getMockAccount(storedRole));
+        }
+
+        if (storedTheme === "light" || storedTheme === "dark") {
+          setThemeMode(storedTheme);
         }
       } finally {
         setIsLoading(false);
@@ -140,6 +149,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const toggleThemeMode = async () => {
+    const newTheme = themeMode === "light" ? "dark" : "light";
+    await storageSetItem(THEME_STORAGE_KEY, newTheme);
+    setThemeMode(newTheme);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -149,6 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         signIn,
         signOut,
+        themeMode,
+        toggleThemeMode,
       }}
     >
       {children}
@@ -164,4 +181,9 @@ export function useAuth() {
   }
 
   return context;
+}
+
+export function useThemeMode() {
+  const { themeMode, toggleThemeMode } = useAuth();
+  return { themeMode, toggleThemeMode };
 }

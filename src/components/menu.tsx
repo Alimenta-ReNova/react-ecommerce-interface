@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // 1. Importe o router
 import React from "react";
 import {
-  Dimensions,
-  Modal,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Modal,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useAuth } from "./auth-context";
 import { Colors } from "../constants/theme";
+import { useAuth } from "./auth-context";
 
 interface MenuProps {
   visible: boolean;
@@ -27,6 +27,7 @@ export default function Menu({ visible, onClose }: MenuProps) {
   const menuItems = [
     { label: "Inicio", path: "/", active: true },
     { label: "Categorias", path: "/categories", active: false },
+    { label: "Alertas", path: "/(tabs)/alerts", active: false },
     { label: "Meu Perfil", path: "/(tabs)/profile", active: false },
     { label: "Entre em contato", path: "/contact", active: false },
     { label: "Configurações", path: "/settings", active: false },
@@ -66,11 +67,13 @@ export default function Menu({ visible, onClose }: MenuProps) {
                 </View>
                 <View>
                   <Text style={[styles.userName, { color: theme.text }]}>
-                    User1234
+                    {user?.name ?? "Convidado"}
                   </Text>
-                  <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
-                    Furg
-                  </Text>
+                  {user && (
+                    <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
+                      {user.email}
+                    </Text>
+                  )}
                 </View>
               </View>
 

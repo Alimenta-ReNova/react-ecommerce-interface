@@ -12,6 +12,7 @@ export default function RootLayout() {
         <Stack.Screen name="user-products" />
         <Stack.Screen name="purchase-history" />
         <Stack.Screen name="alert-preferences" />
+        <Stack.Screen name="alert-details" />
         <Stack.Screen name="settings" />
       </Stack>
     </AuthProvider>

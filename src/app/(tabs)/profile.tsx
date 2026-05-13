@@ -2,12 +2,12 @@ import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../components/auth-context";
@@ -159,6 +159,7 @@ export default function ProfileScreen() {
               subtitle="Horário e Canal"
               onPress={() => router.push("/alert-preferences")}
             />
+
             <ProfileMenuItem
               theme={theme}
               icon={<Feather name="settings" size={24} color={itemColor} />}
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
   cardText: { flex: 1 },
   cardTitle: { fontSize: 18, fontWeight: "bold", fontFamily: "serif" }, // <-- Definição que estava faltando
   cardSubtitle: { fontSize: 14, marginTop: 2 }, // <-- Definição que estava faltando
-  divider: { height: 1, width: "100%", opacity: 0.1, marginTop: 15 }, // <-- Definição que estava faltando
+  divider: { height: 1, width: "100%", opacity: 0.1, marginTop: 15 },
   logoutButton: {
     backgroundColor: "#FFE5E5",
     flexDirection: "row",
