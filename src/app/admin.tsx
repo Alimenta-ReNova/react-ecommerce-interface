@@ -6,12 +6,12 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    useColorScheme,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../components/auth-context";
-import { Colors } from "../constants/theme";
+import BackHomeButton from "../components/back-home-button";
+import { useTheme } from "../hooks/use-theme";
 
 const adminCards = [
   { title: "Usuários ativos", value: "128", icon: "users" as const },
@@ -21,8 +21,7 @@ const adminCards = [
 
 export default function AdminScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const { isAuthenticated, isLoading, role, signOut } = useAuth();
 
   React.useEffect(() => {
@@ -49,7 +48,12 @@ export default function AdminScreen() {
       style={[styles.safeArea, { backgroundColor: theme.background }]}
     >
       <View style={styles.header}>
-        <View>
+        <BackHomeButton
+          backgroundColor={theme.backgroundElement}
+          iconColor={theme.text}
+        />
+
+        <View style={styles.headerCenter}>
           <Text style={[styles.kicker, { color: theme.textSecondary }]}>
             Painel de controle
           </Text>
@@ -119,11 +123,12 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 10,
+    gap: 12,
   },
+  headerCenter: { flex: 1, alignItems: "center" },
   kicker: {
     fontSize: 13,
     fontWeight: "600",

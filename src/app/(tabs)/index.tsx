@@ -6,11 +6,11 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    useColorScheme,
     View,
 } from "react-native";
 import Menu from "../../components/menu";
 import { Colors, Fonts, Spacing } from "../../constants/theme";
+import { useTheme } from "../../hooks/use-theme";
 
 interface Product {
   id: string;
@@ -176,8 +176,7 @@ const ProductRow = ({
 
 export default function Home() {
   const [menuVisible, setMenuVisible] = useState(false);
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

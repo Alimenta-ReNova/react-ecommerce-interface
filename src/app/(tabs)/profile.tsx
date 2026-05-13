@@ -2,17 +2,17 @@ import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../components/auth-context";
+import BackHomeButton from "../../components/back-home-button";
 import Menu from "../../components/menu";
-import { Colors } from "../../constants/theme";
+import { useTheme } from "../../hooks/use-theme";
 
 interface ProfileItemProps {
   icon: React.ReactNode;
@@ -48,8 +48,7 @@ const ProfileMenuItem = ({
 
 export default function ProfileScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const router = useRouter();
   const { isAuthenticated, isLoading, role, signOut, user } = useAuth();
 
@@ -87,6 +86,18 @@ export default function ProfileScreen() {
         <Menu visible={menuVisible} onClose={() => setMenuVisible(false)} />
 
         <View style={styles.header}>
+          <BackHomeButton
+            backgroundColor={theme.backgroundElement}
+            iconColor={theme.text}
+          />
+          <Text
+            style={[
+              styles.title,
+              { color: theme.text, flex: 1, textAlign: "center" },
+            ]}
+          >
+            Perfil
+          </Text>
           <TouchableOpacity
             style={[
               styles.menuBtn,
@@ -96,8 +107,6 @@ export default function ProfileScreen() {
           >
             <Ionicons name="menu" size={24} color={theme.text} />
           </TouchableOpacity>
-          <Text style={[styles.title, { color: theme.text }]}>Perfil</Text>
-          <View style={styles.placeholder} />
         </View>
 
         <ScrollView
@@ -192,11 +201,11 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
     marginTop: 10,
     marginBottom: 30,
+    gap: 12,
   },
   menuBtn: {
     width: 45,
