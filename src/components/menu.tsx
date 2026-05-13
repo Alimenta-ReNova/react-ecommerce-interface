@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { Colors } from "../constants/theme";
+import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "./auth-context";
 
 interface MenuProps {
@@ -19,7 +19,7 @@ interface MenuProps {
 }
 
 export default function Menu({ visible, onClose }: MenuProps) {
-  const theme = Colors.light;
+  const theme = useTheme();
   const router = useRouter(); // 2. Inicialize o router
   const { user, signOut } = useAuth();
 
@@ -77,7 +77,13 @@ export default function Menu({ visible, onClose }: MenuProps) {
                 </View>
               </View>
 
-              <TouchableOpacity onPress={onClose} style={styles.backButton}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={[
+                  styles.backButton,
+                  { backgroundColor: theme.backgroundElement },
+                ]}
+              >
                 <Ionicons name="chevron-back" size={24} color={theme.text} />
               </TouchableOpacity>
             </View>
@@ -87,7 +93,11 @@ export default function Menu({ visible, onClose }: MenuProps) {
               {menuItems.map((item, index) => (
                 <View key={index}>
                   <TouchableOpacity
-                    style={[styles.menuItem, item.active && styles.activeItem]}
+                    style={[
+                      styles.menuItem,
+                      { backgroundColor: theme.backgroundElement },
+                      item.active && styles.activeItem,
+                    ]}
                     onPress={() => navigateTo(item.path)} // 4. Adicione o clique aqui
                   >
                     <Text style={[styles.menuText, { color: theme.text }]}>
@@ -171,7 +181,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   backButton: {
-    backgroundColor: "#E8D8B8",
     padding: 10,
     borderRadius: 14,
   },
@@ -179,7 +188,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   menuItem: {
-    backgroundColor: "#D9D9D9",
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",

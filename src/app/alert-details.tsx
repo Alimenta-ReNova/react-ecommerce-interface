@@ -1,5 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
     ScrollView,
@@ -7,17 +5,15 @@ import {
     Switch,
     Text,
     TouchableOpacity,
-    useColorScheme,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "../constants/theme";
+import BackHomeButton from "../components/back-home-button";
 import { useSafeStorage } from "../hooks/use-safe-storage";
+import { useTheme } from "../hooks/use-theme";
 
 export default function AlertDetails() {
-  const router = useRouter();
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const storage = useSafeStorage();
 
   const [advanceDays, setAdvanceDays] = useState(3);
@@ -98,16 +94,14 @@ export default function AlertDetails() {
       style={[styles.safeArea, { backgroundColor: theme.background }]}
     >
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.backBtn, { backgroundColor: theme.backgroundElement }]}
-        >
-          <Ionicons name="chevron-back" size={24} color={theme.text} />
-        </TouchableOpacity>
+        <BackHomeButton
+          backgroundColor={theme.backgroundElement}
+          iconColor={theme.text}
+        />
         <Text style={[styles.title, { color: theme.text }]}>
           Detalhes das Notificações
         </Text>
-        <View style={{ width: 45 }} />
+        <View style={{ width: 44 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
@@ -247,7 +241,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-  backBtn: { padding: 10, borderRadius: 12 },
   title: { fontSize: 20, fontWeight: "700" },
   container: { padding: 20 },
   sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },

@@ -13,12 +13,12 @@ export const Colors = {
     accent: "#4B5320", // Verde oliva dos cards
   },
   dark: {
-    text: "#F5E6CC",
-    background: "#1A0F0A",
-    backgroundElement: "#2D1A12",
-    backgroundSelected: "#3D2820",
-    textSecondary: "#8B7560",
-    accent: "#6B7340",
+    text: "#F3E7D4",
+    background: "#0F0B08",
+    backgroundElement: "#1A1410",
+    backgroundSelected: "#25201B",
+    textSecondary: "#B79F8D",
+    accent: "#B8B07A",
   },
 } as const;
 

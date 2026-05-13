@@ -1,22 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
-} from "react-native";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "../constants/theme";
+import BackHomeButton from "../components/back-home-button";
 import { useSafeStorage } from "../hooks/use-safe-storage";
+import { useTheme } from "../hooks/use-theme";
 
 export default function AlertPreferences() {
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const storage = useSafeStorage();
 
   const [stockAlert, setStockAlert] = useState(true);
@@ -51,14 +43,12 @@ export default function AlertPreferences() {
       style={[styles.safeArea, { backgroundColor: theme.background }]}
     >
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.backBtn, { backgroundColor: theme.backgroundElement }]}
-        >
-          <Ionicons name="chevron-back" size={24} color={theme.text} />
-        </TouchableOpacity>
+        <BackHomeButton
+          backgroundColor={theme.backgroundElement}
+          iconColor={theme.text}
+        />
         <Text style={[styles.title, { color: theme.text }]}>Alertas</Text>
-        <View style={{ width: 45 }} />
+        <View style={{ width: 44 }} />
       </View>
 
       <View style={styles.content}>
@@ -126,7 +116,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  backBtn: { padding: 10, borderRadius: 12 },
   title: { fontSize: 24, fontWeight: "bold", fontFamily: "serif" },
   content: { padding: 20 },
   settingRow: {

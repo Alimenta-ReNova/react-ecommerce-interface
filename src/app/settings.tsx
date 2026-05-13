@@ -1,22 +1,13 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import React from "react";
-import {
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-  useColorScheme,
-} from "react-native";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useThemeMode } from "../components/auth-context";
-import { Colors } from "../constants/theme";
+import BackHomeButton from "../components/back-home-button";
+import { useTheme } from "../hooks/use-theme";
 
 export default function Settings() {
-  const router = useRouter();
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const { themeMode, toggleThemeMode } = useThemeMode();
 
   return (
@@ -24,14 +15,12 @@ export default function Settings() {
       style={[styles.safeArea, { backgroundColor: theme.background }]}
     >
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.backBtn, { backgroundColor: theme.backgroundElement }]}
-        >
-          <Ionicons name="chevron-back" size={24} color={theme.text} />
-        </TouchableOpacity>
+        <BackHomeButton
+          backgroundColor={theme.backgroundElement}
+          iconColor={theme.text}
+        />
         <Text style={[styles.title, { color: theme.text }]}>Configurações</Text>
-        <View style={{ width: 45 }} />
+        <View style={{ width: 44 }} />
       </View>
 
       <View style={styles.content}>

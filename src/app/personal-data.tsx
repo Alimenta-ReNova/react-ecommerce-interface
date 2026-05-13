@@ -1,23 +1,22 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useColorScheme,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../components/auth-context";
-import { Colors } from "../constants/theme";
+import BackHomeButton from "../components/back-home-button";
+import { useTheme } from "../hooks/use-theme";
 
 export default function PersonalData() {
   const router = useRouter();
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const { isAuthenticated, user } = useAuth();
 
   return (
@@ -26,15 +25,10 @@ export default function PersonalData() {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={[
-              styles.backBtn,
-              { backgroundColor: theme.backgroundElement },
-            ]}
-          >
-            <Ionicons name="chevron-back" size={24} color={theme.text} />
-          </TouchableOpacity>
+          <BackHomeButton
+            backgroundColor={theme.backgroundElement}
+            iconColor={theme.text}
+          />
           <Text style={[styles.title, { color: theme.text }]}>
             Dados Pessoais
           </Text>
@@ -122,7 +116,7 @@ export default function PersonalData() {
 
           <TouchableOpacity
             style={[styles.saveButton, { backgroundColor: theme.text }]}
-            onPress={() => router.back()}
+            onPress={() => router.replace("/(tabs)")}
           >
             <Text style={[styles.saveButtonText, { color: theme.background }]}>
               Salvar Alterações
@@ -138,13 +132,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", padding: 20, gap: 15 },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   title: { fontSize: 24, fontWeight: "bold", fontFamily: "serif" },
   scrollContent: { padding: 20, paddingBottom: 50 },
   label: {

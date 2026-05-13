@@ -1,24 +1,25 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-  Image,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  getMockAccount,
-  useAuth,
-  UserRole,
-  validateMockCredentials,
+    getMockAccount,
+    useAuth,
+    UserRole,
+    validateMockCredentials,
 } from "../components/auth-context";
-import { Colors, Fonts, Spacing } from "../constants/theme";
+import BackHomeButton from "../components/back-home-button";
+import { Fonts, Spacing } from "../constants/theme";
+import { useTheme } from "../hooks/use-theme";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -27,8 +28,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
   const { signIn, isLoading, isAuthenticated, role } = useAuth();
   const mockAccount = getMockAccount(selectedRole);
 
@@ -70,12 +70,11 @@ export default function LoginScreen() {
       style={[styles.safeArea, { backgroundColor: theme.background }]}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity
+        <BackHomeButton
+          backgroundColor={theme.backgroundElement}
+          iconColor={theme.text}
           style={styles.backButton}
-          onPress={() => router.replace("/(tabs)")}
-        >
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
-        </TouchableOpacity>
+        />
 
         <View style={styles.header}>
           <Image

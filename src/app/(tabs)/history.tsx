@@ -6,10 +6,10 @@ import {
     Text,
     TouchableOpacity,
     View,
-    useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "../../constants/theme";
+import BackHomeButton from "../../components/back-home-button";
+import { useTheme } from "../../hooks/use-theme";
 
 type PurchaseItem = {
   id: string;
@@ -74,17 +74,21 @@ function getStatusColor(status: string, theme: any): string {
 }
 
 export default function History() {
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme as keyof typeof Colors];
+  const theme = useTheme();
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
     >
       <View style={styles.header}>
+        <BackHomeButton
+          backgroundColor={theme.backgroundElement}
+          iconColor={theme.text}
+        />
         <Text style={[styles.title, { color: theme.text }]}>
           Histórico de Compras
         </Text>
+        <View style={{ width: 44 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -180,12 +184,14 @@ export default function History() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  safeArea: { flex: 1 },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E8D8B8",
+    marginTop: 10,
+    marginBottom: 20,
   },
   title: { fontSize: 24, fontWeight: "bold", fontFamily: "serif" },
   content: { padding: 20, paddingBottom: 100 },
