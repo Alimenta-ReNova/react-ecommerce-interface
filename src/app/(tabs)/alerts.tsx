@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../components/auth-context";
 import BackHomeButton from "../../components/back-home-button";
 import { useSafeStorage } from "../../hooks/use-safe-storage";
 import { useTheme } from "../../hooks/use-theme";
@@ -17,12 +18,14 @@ export default function Alerts() {
   const router = useRouter();
   const theme = useTheme();
   const storage = useSafeStorage();
+  const { user } = useAuth();
 
   const [stockAlert, setStockAlert] = useState(true);
   const [expiryAlert, setExpiryAlert] = useState(true);
 
-  const STORAGE_KEY_STOCK = "@renova:alert-stock";
-  const STORAGE_KEY_EXPIRY = "@renova:alert-expiry";
+  const userKey = user?.email || "guest";
+  const STORAGE_KEY_STOCK = `@renova:alert-stock:${userKey}`;
+  const STORAGE_KEY_EXPIRY = `@renova:alert-expiry:${userKey}`;
 
   useEffect(() => {
     (async () => {
