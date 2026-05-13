@@ -1,24 +1,24 @@
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
 /**
  * Cores do ReNova baseadas no Figma
  */
 export const Colors = {
   light: {
-    text: '#60412B',
-    background: '#FDF7E7',
-    backgroundElement: '#F5E6CC',
-    backgroundSelected: '#E8D8B8',
-    textSecondary: '#A69080',
-    accent: '#4B5320', // Verde oliva dos cards
+    text: "#60412B",
+    background: "#FDF7E7",
+    backgroundElement: "#F5E6CC",
+    backgroundSelected: "#E8D8B8",
+    textSecondary: "#A69080",
+    accent: "#4B5320", // Verde oliva dos cards
   },
   dark: {
-    text: '#FDF7E7',
-    background: '#2B1B12',
-    backgroundElement: '#3D2B1F',
-    backgroundSelected: '#4D3B2F',
-    textSecondary: '#A69080',
-    accent: '#6B7340',
+    text: "#F5E6CC",
+    background: "#1A0F0A",
+    backgroundElement: "#2D1A12",
+    backgroundSelected: "#3D2820",
+    textSecondary: "#8B7560",
+    accent: "#6B7340",
   },
 } as const;
 
@@ -27,16 +27,16 @@ export const Colors = {
  */
 export const Fonts = Platform.select({
   ios: {
-    sans: 'System',
-    serif: 'ui-serif',
-    rounded: 'ui-rounded',
-    mono: 'Courier',
+    sans: "System",
+    serif: "ui-serif",
+    rounded: "ui-rounded",
+    mono: "Courier",
   },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+    sans: "normal",
+    serif: "serif",
+    rounded: "normal",
+    mono: "monospace",
   },
 });
 
