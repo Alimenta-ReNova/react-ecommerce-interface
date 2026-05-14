@@ -1,5 +1,5 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -71,6 +71,7 @@ function CategoryPanel({
   onDeleteItem: (categoryId: string, itemId: string) => void;
 }) {
   const [draft, setDraft] = useState({ ...emptyItemDraft });
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
 
   return (
     <View
@@ -266,94 +267,263 @@ function CategoryPanel({
           </View>
 
           <View style={styles.adminItemList}>
+            {category.items.length > 0 && (
+              <View style={styles.tableHeader}>
+                <Text
+                  style={[
+                    styles.tableHeaderCell,
+                    { color: theme.text, flex: 1 },
+                  ]}
+                >
+                  Nome
+                </Text>
+                <Text
+                  style={[
+                    styles.tableHeaderCell,
+                    { color: theme.text, width: 50 },
+                  ]}
+                >
+                  Icon
+                </Text>
+                <Text
+                  style={[
+                    styles.tableHeaderCell,
+                    { color: theme.text, width: 70 },
+                  ]}
+                >
+                  Etiqueta
+                </Text>
+                <Text
+                  style={[
+                    styles.tableHeaderCell,
+                    { color: theme.text, width: 60 },
+                  ]}
+                >
+                  Cor
+                </Text>
+                <Text
+                  style={[
+                    styles.tableHeaderCell,
+                    { color: theme.text, width: 50 },
+                  ]}
+                >
+                  Ação
+                </Text>
+              </View>
+            )}
             {category.items.map((item) => (
-              <View
-                key={item.id}
-                style={[
-                  styles.adminItemCard,
-                  { borderColor: theme.backgroundSelected },
-                ]}
-              >
-                <View style={styles.rowInputs}>
-                  <TextInput
-                    value={item.name}
-                    onChangeText={(text) =>
-                      onUpdateItem(category.id, item.id, { name: text })
-                    }
-                    style={[
-                      styles.input,
-                      styles.flexInput,
-                      { color: theme.text, backgroundColor: theme.background },
-                    ]}
-                    placeholder="Nome"
-                    placeholderTextColor={theme.textSecondary}
-                  />
-                  <TextInput
-                    value={item.icon}
-                    onChangeText={(text) =>
-                      onUpdateItem(category.id, item.id, { icon: text })
-                    }
-                    style={[
-                      styles.input,
-                      styles.iconInput,
-                      { color: theme.text, backgroundColor: theme.background },
-                    ]}
-                    placeholder="leaf"
-                    placeholderTextColor={theme.textSecondary}
-                  />
-                </View>
-
-                <View style={styles.rowInputs}>
-                  <TextInput
-                    value={item.label}
-                    onChangeText={(text) =>
-                      onUpdateItem(category.id, item.id, { label: text })
-                    }
-                    style={[
-                      styles.input,
-                      styles.flexInput,
-                      { color: theme.text, backgroundColor: theme.background },
-                    ]}
-                    placeholder="Etiqueta"
-                    placeholderTextColor={theme.textSecondary}
-                  />
-                  <TextInput
-                    value={item.color}
-                    onChangeText={(text) =>
-                      onUpdateItem(category.id, item.id, { color: text })
-                    }
-                    style={[
-                      styles.input,
-                      styles.colorInput,
-                      { color: theme.text, backgroundColor: theme.background },
-                    ]}
-                    placeholder="#D4A574"
-                    placeholderTextColor={theme.textSecondary}
-                  />
-                </View>
-
-                <View style={styles.rowInputs}>
-                  <TextInput
-                    value={item.labelColor}
-                    onChangeText={(text) =>
-                      onUpdateItem(category.id, item.id, { labelColor: text })
-                    }
-                    style={[
-                      styles.input,
-                      styles.flexInput,
-                      { color: theme.text, backgroundColor: theme.background },
-                    ]}
-                    placeholder="#6B5B4A"
-                    placeholderTextColor={theme.textSecondary}
-                  />
-                  <TouchableOpacity
-                    style={styles.deleteItemButton}
-                    onPress={() => onDeleteItem(category.id, item.id)}
+              <View key={item.id}>
+                <TouchableOpacity
+                  style={[
+                    styles.tableRow,
+                    { backgroundColor: theme.background },
+                    expandedItemId === item.id && styles.tableRowExpanded,
+                  ]}
+                  onPress={() =>
+                    setExpandedItemId(
+                      expandedItemId === item.id ? null : item.id,
+                    )
+                  }
+                >
+                  <Text
+                    style={[styles.tableCell, { color: theme.text, flex: 1 }]}
+                    numberOfLines={1}
                   >
-                    <Feather name="trash-2" size={16} color="#D92D20" />
-                    <Text style={styles.deleteButtonText}>Excluir</Text>
+                    {item.name}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      {
+                        color: theme.textSecondary,
+                        width: 50,
+                        textAlign: "center",
+                      },
+                    ]}
+                  >
+                    {item.icon}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCell,
+                      { color: theme.textSecondary, width: 70 },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.label}
+                  </Text>
+                  <View style={{ width: 60, alignItems: "center" }}>
+                    <View
+                      style={[
+                        styles.colorPreview,
+                        { backgroundColor: item.color },
+                      ]}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    style={{ width: 50, alignItems: "center" }}
+                    onPress={() =>
+                      setExpandedItemId(
+                        expandedItemId === item.id ? null : item.id,
+                      )
+                    }
+                  >
+                    <Feather
+                      name={
+                        expandedItemId === item.id
+                          ? "chevron-up"
+                          : "chevron-down"
+                      }
+                      size={16}
+                      color={theme.textSecondary}
+                    />
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
+
+                {expandedItemId === item.id && (
+                  <View
+                    style={[
+                      styles.expandedItemView,
+                      {
+                        backgroundColor: theme.backgroundElement,
+                        borderBottomColor: theme.backgroundSelected,
+                      },
+                    ]}
+                  >
+                    <View style={styles.expandedRowInputs}>
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={[styles.expandedLabel, { color: theme.text }]}
+                        >
+                          Nome
+                        </Text>
+                        <TextInput
+                          value={item.name}
+                          onChangeText={(text) =>
+                            onUpdateItem(category.id, item.id, { name: text })
+                          }
+                          style={[
+                            styles.expandedInput,
+                            {
+                              color: theme.text,
+                              backgroundColor: theme.background,
+                            },
+                          ]}
+                          placeholder="Nome"
+                          placeholderTextColor={theme.textSecondary}
+                        />
+                      </View>
+                      <View style={{ width: 90, marginLeft: 10 }}>
+                        <Text
+                          style={[styles.expandedLabel, { color: theme.text }]}
+                        >
+                          Ícone
+                        </Text>
+                        <TextInput
+                          value={item.icon}
+                          onChangeText={(text) =>
+                            onUpdateItem(category.id, item.id, { icon: text })
+                          }
+                          style={[
+                            styles.expandedInput,
+                            {
+                              color: theme.text,
+                              backgroundColor: theme.background,
+                            },
+                          ]}
+                          placeholder="leaf"
+                          placeholderTextColor={theme.textSecondary}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.expandedRowInputs}>
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={[styles.expandedLabel, { color: theme.text }]}
+                        >
+                          Etiqueta
+                        </Text>
+                        <TextInput
+                          value={item.label}
+                          onChangeText={(text) =>
+                            onUpdateItem(category.id, item.id, { label: text })
+                          }
+                          style={[
+                            styles.expandedInput,
+                            {
+                              color: theme.text,
+                              backgroundColor: theme.background,
+                            },
+                          ]}
+                          placeholder="Etiqueta"
+                          placeholderTextColor={theme.textSecondary}
+                        />
+                      </View>
+                      <View style={{ width: 90, marginLeft: 10 }}>
+                        <Text
+                          style={[styles.expandedLabel, { color: theme.text }]}
+                        >
+                          Cor do item
+                        </Text>
+                        <TextInput
+                          value={item.color}
+                          onChangeText={(text) =>
+                            onUpdateItem(category.id, item.id, { color: text })
+                          }
+                          style={[
+                            styles.expandedInput,
+                            {
+                              color: theme.text,
+                              backgroundColor: theme.background,
+                            },
+                          ]}
+                          placeholder="#D4A574"
+                          placeholderTextColor={theme.textSecondary}
+                          autoCapitalize="characters"
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.expandedRowInputs}>
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={[styles.expandedLabel, { color: theme.text }]}
+                        >
+                          Cor da etiqueta
+                        </Text>
+                        <TextInput
+                          value={item.labelColor}
+                          onChangeText={(text) =>
+                            onUpdateItem(category.id, item.id, {
+                              labelColor: text,
+                            })
+                          }
+                          style={[
+                            styles.expandedInput,
+                            {
+                              color: theme.text,
+                              backgroundColor: theme.background,
+                            },
+                          ]}
+                          placeholder="#6B5B4A"
+                          placeholderTextColor={theme.textSecondary}
+                          autoCapitalize="characters"
+                        />
+                      </View>
+                      <TouchableOpacity
+                        style={[
+                          styles.deleteItemButton,
+                          { marginLeft: 10, marginTop: 24 },
+                        ]}
+                        onPress={() => onDeleteItem(category.id, item.id)}
+                      >
+                        <Feather name="trash-2" size={16} color="#D92D20" />
+                        <Text style={styles.deleteButtonText}>Deletar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -383,6 +553,8 @@ export default function CategoriesScreen() {
     description: "",
     accentColor: "#D4A574",
   });
+
+  const scrollRef = useRef<ScrollView | null>(null);
 
   const catalogSize = useMemo(
     () => categories.reduce((sum, category) => sum + category.items.length, 0),
@@ -423,6 +595,7 @@ export default function CategoriesScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -527,6 +700,15 @@ export default function CategoriesScreen() {
                   description: "",
                   accentColor: "#D4A574",
                 });
+
+                // scroll to show newly added category at the bottom
+                setTimeout(() => {
+                  try {
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                  } catch (e) {
+                    /* ignore */
+                  }
+                }, 220);
               }}
             >
               <Text
@@ -685,6 +867,69 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF5F3",
   },
   deleteButtonText: { color: "#D92D20", fontSize: 14, fontWeight: "700" },
-  adminItemList: { gap: 10, marginTop: 4 },
+  adminItemList: { gap: 0, marginTop: 4, borderRadius: 12, overflow: "hidden" },
+  tableHeader: {
+    flexDirection: "row",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: "rgba(96,65,43,0.14)",
+    gap: 10,
+    alignItems: "center",
+  },
+  tableHeaderCell: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(96,65,43,0.08)",
+    gap: 10,
+    alignItems: "center",
+  },
+  tableRowExpanded: {
+    backgroundColor: "rgba(96,65,43,0.04)",
+  },
+  tableCell: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  colorPreview: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(96,65,43,0.2)",
+  },
+  expandedItemView: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderBottomWidth: 2,
+    gap: 12,
+  },
+  expandedRowInputs: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  expandedLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  expandedInput: {
+    minHeight: 40,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "rgba(96,65,43,0.14)",
+    fontSize: 13,
+  },
   adminItemCard: { borderWidth: 1, borderRadius: 18, padding: 12, gap: 10 },
 });
