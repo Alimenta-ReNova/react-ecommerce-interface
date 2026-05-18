@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Menu from "../../components/menu";
 import { CatalogItem, useCatalog } from "../../components/catalog-context";
 import { Colors, Fonts, Spacing } from "../../constants/theme";
@@ -80,7 +81,9 @@ export default function Home() {
   const { categories } = useCatalog();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       {/* Menu Lateral */}
       <Menu visible={menuVisible} onClose={() => setMenuVisible(false)} />
 
@@ -123,7 +126,7 @@ export default function Home() {
           />
         ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
