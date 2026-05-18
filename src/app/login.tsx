@@ -25,21 +25,55 @@ export default function LoginScreen() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [selectedRole, setSelectedRole] = useState<UserRole>("user");
+  const [name, setName] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const theme = useTheme();
-  const { signIn, isLoading, isAuthenticated, role } = useAuth();
+  const { registerUser, signIn, isLoading, isAuthenticated, role } = useAuth();
   const mockAccount = getMockAccount(selectedRole);
 
   const handleSubmit = async () => {
+    if (!isLogin) {
+      if (selectedRole !== "user") {
+        setErrorMessage("Contas de administrador são criadas apenas no painel admin.");
+        return;
+      }
+
+      if (!name.trim() || !cpf.trim() || !phone.trim() || !email.trim() || !password.trim()) {
+        setErrorMessage("Preencha todos os campos para criar sua conta.");
+        return;
+      }
+
+      try {
+        await registerUser({
+          name,
+          cpf,
+          phone,
+          email,
+          password,
+        });
+
+        await signIn("user", email);
+        router.replace("/profile");
+        return;
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error ? error.message : "Não foi possível criar a conta.",
+        );
+        return;
+      }
+    }
+
     if (!validateMockCredentials(selectedRole, email, password)) {
       setErrorMessage("E-mail ou senha inválidos para este perfil.");
       return;
     }
 
     setErrorMessage("");
-    await signIn(selectedRole);
+    await signIn(selectedRole, email);
     router.replace(selectedRole === "admin" ? "/admin" : "/profile");
   };
 
@@ -48,10 +82,12 @@ export default function LoginScreen() {
       return;
     }
 
-    setEmail(mockAccount.email);
-    setPassword(mockAccount.password);
-    setErrorMessage("");
-  }, [mockAccount]);
+    if (isLogin) {
+      setEmail(mockAccount.email);
+      setPassword(mockAccount.password);
+      setErrorMessage("");
+    }
+  }, [isLogin, mockAccount]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated) {
@@ -173,7 +209,13 @@ export default function LoginScreen() {
               ]}
             >
               <Feather name="user" size={18} color={theme.textSecondary} />
-              <TextInput placeholder="Nome" style={styles.input} />
+              <TextInput
+                placeholder="Nome"
+                value={name}
+                onChangeText={setName}
+                style={styles.input}
+                placeholderTextColor={theme.textSecondary}
+              />
             </View>
           )}
 
@@ -187,8 +229,29 @@ export default function LoginScreen() {
               <Feather name="shield" size={18} color={theme.textSecondary} />
               <TextInput
                 placeholder="CPF"
+                value={cpf}
+                onChangeText={setCpf}
                 style={styles.input}
                 keyboardType="numeric"
+                placeholderTextColor={theme.textSecondary}
+              />
+            </View>
+          )}
+
+          {!isLogin && (
+            <View
+              style={[
+                styles.inputGroup,
+                { backgroundColor: theme.backgroundElement },
+              ]}
+            >
+              <Feather name="phone" size={18} color={theme.textSecondary} />
+              <TextInput
+                placeholder="Telefone"
+                value={phone}
+                onChangeText={setPhone}
+                style={styles.input}
+                keyboardType="phone-pad"
               />
             </View>
           )}

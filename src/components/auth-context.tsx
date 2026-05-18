@@ -146,11 +146,16 @@ type AuthContextValue = {
   accounts: MockAccount[];
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (role: UserRole) => Promise<void>;
+  signIn: (role: UserRole, email?: string) => Promise<void>;
   signOut: () => Promise<void>;
   registerUser: (account: Omit<MockAccount, "role">) => Promise<void>;
   themeMode: "light" | "dark";
   toggleThemeMode: () => Promise<void>;
+};
+
+type AuthStorageValue = {
+  role: UserRole;
+  email?: string;
 };
 
 const AUTH_STORAGE_KEY = "@renova:auth-role";
@@ -177,11 +182,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         mockAccountsStore = nextAccounts;
         setAccounts(nextAccounts);
 
-        if (storedRole === "user" || storedRole === "admin") {
-          setRole(storedRole);
-          setUser(
-            nextAccounts.find((account) => account.role === storedRole) ?? null,
-          );
+        if (storedRole) {
+          try {
+            const parsed = JSON.parse(storedRole) as AuthStorageValue;
+
+            if (parsed && (parsed.role === "user" || parsed.role === "admin")) {
+              const storedEmail = parsed.email ? normalizeEmail(parsed.email) : null;
+              const nextUser = storedEmail
+                ? nextAccounts.find(
+                    (account) =>
+                      account.role === parsed.role &&
+                      normalizeEmail(account.email) === storedEmail,
+                  ) ?? nextAccounts.find((account) => account.role === parsed.role) ?? null
+                : nextAccounts.find((account) => account.role === parsed.role) ?? null;
+
+              setRole(parsed.role);
+              setUser(nextUser);
+            }
+          } catch {
+            if (storedRole === "user" || storedRole === "admin") {
+              setRole(storedRole);
+              setUser(
+                nextAccounts.find((account) => account.role === storedRole) ?? null,
+              );
+            }
+          }
         }
 
         if (storedTheme === "light" || storedTheme === "dark") {
@@ -195,11 +220,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadRole();
   }, []);
 
-  const signIn = async (nextRole: UserRole) => {
-    await storageSetItem(AUTH_STORAGE_KEY, nextRole);
+  const signIn = async (nextRole: UserRole, email?: string) => {
+    await storageSetItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({ role: nextRole, email: email ? normalizeEmail(email) : undefined }),
+    );
     setRole(nextRole);
+    const normalizedEmail = email ? normalizeEmail(email) : null;
     setUser(
-      getAccountsSnapshot().find((account) => account.role === nextRole) ??
+      (normalizedEmail
+        ? getAccountsSnapshot().find(
+            (account) =>
+              account.role === nextRole &&
+              normalizeEmail(account.email) === normalizedEmail,
+          )
+        : null) ??
+        getAccountsSnapshot().find((account) => account.role === nextRole) ??
         null,
     );
   };
