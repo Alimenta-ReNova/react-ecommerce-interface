@@ -53,9 +53,9 @@ RENOVA/
 
 [x] Interface Adaptativa: Design moderno com suporte a Light/Dark Mode via constants/theme.
 
-[x] Componentização: Uso de componentes reutilizáveis para garantir a consistência visual.
+[] Componentização: Uso de componentes reutilizáveis para garantir a consistência visual.
 
-[x] Lógica de Acesso: Fluxo de redirecionamento para login ao aceder a áreas restritas.
+[] Lógica de Acesso: Fluxo de redirecionamento para login ao aceder a áreas restritas.
 
 [ ] Persistência de Dados: Integração com base de dados (Planeado para as próximas etapas).
 
@@ -65,14 +65,16 @@ RENOVA/
 
 Clonar o repositório:
 
-Bash
-git clone [https://github.com/teu-usuario/renova.git](https://github.com/teu-usuario/renova.git)
+```text
+git clone [https://github.com/Alimenta-ReNova/react-ecommerce-interface.git]
+````
 Instalar as dependências:
-
-Bash
+```text
 npm install
+````
 Iniciar o ambiente Expo:
-
-Bash
+```text
 npx expo start -c
+````
+
 Utilize o QR Code no app Expo Go para testar no seu dispositivo físico.
