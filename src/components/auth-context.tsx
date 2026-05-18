@@ -54,6 +54,7 @@ export type MockAccount = {
   password: string;
   cpf: string;
   phone: string;
+  photo?: string;
 };
 
 const seededMockAccounts: MockAccount[] = [
@@ -98,7 +99,8 @@ function isMockAccount(value: unknown): value is MockAccount {
     typeof account.email === "string" &&
     typeof account.password === "string" &&
     typeof account.cpf === "string" &&
-    typeof account.phone === "string"
+    typeof account.phone === "string" &&
+    (account.photo === undefined || typeof account.photo === "string")
   );
 }
 
@@ -149,6 +151,7 @@ type AuthContextValue = {
   signIn: (role: UserRole, email?: string) => Promise<void>;
   signOut: () => Promise<void>;
   registerUser: (account: Omit<MockAccount, "role">) => Promise<void>;
+  updateUserPhoto: (photo: string) => Promise<void>;
   themeMode: "light" | "dark";
   toggleThemeMode: () => Promise<void>;
 };
@@ -161,6 +164,7 @@ type AuthStorageValue = {
 const AUTH_STORAGE_KEY = "@renova:auth-role";
 const THEME_STORAGE_KEY = "@renova:theme-mode";
 const ACCOUNTS_STORAGE_KEY = "@renova:mock-accounts";
+const USER_THEME_STORAGE_PREFIX = "@renova:user-theme-";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -175,7 +179,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const loadRole = async () => {
       try {
         const storedRole = await storageGetItem(AUTH_STORAGE_KEY);
-        const storedTheme = await storageGetItem(THEME_STORAGE_KEY);
         const storedAccounts = await storageGetItem(ACCOUNTS_STORAGE_KEY);
 
         const nextAccounts = loadAccountsFromStorage(storedAccounts);
@@ -206,6 +209,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
               setRole(parsed.role);
               setUser(nextUser);
+
+              if (nextUser) {
+                const userThemeKey =
+                  USER_THEME_STORAGE_PREFIX + normalizeEmail(nextUser.email);
+                const userTheme = await storageGetItem(userThemeKey);
+                if (userTheme === "light" || userTheme === "dark") {
+                  setThemeMode(userTheme);
+                } else {
+                  setThemeMode("light");
+                }
+              }
             }
           } catch {
             if (storedRole === "user" || storedRole === "admin") {
@@ -214,12 +228,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 nextAccounts.find((account) => account.role === storedRole) ??
                   null,
               );
+              setThemeMode("light");
             }
           }
-        }
-
-        if (storedTheme === "light" || storedTheme === "dark") {
-          setThemeMode(storedTheme);
+        } else {
+          setThemeMode("light");
         }
       } finally {
         setIsLoading(false);
@@ -230,15 +243,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (nextRole: UserRole, email?: string) => {
+    const normalizedEmail = email ? normalizeEmail(email) : null;
+    let nextThemeMode: "light" | "dark" = "light";
+
+    if (normalizedEmail) {
+      const userThemeKey = USER_THEME_STORAGE_PREFIX + normalizedEmail;
+      const storedTheme = await storageGetItem(userThemeKey);
+
+      if (storedTheme === "light" || storedTheme === "dark") {
+        nextThemeMode = storedTheme;
+      }
+    }
+
+    setThemeMode(nextThemeMode);
     await storageSetItem(
       AUTH_STORAGE_KEY,
       JSON.stringify({
         role: nextRole,
-        email: email ? normalizeEmail(email) : undefined,
+        email: normalizedEmail ?? undefined,
       }),
     );
     setRole(nextRole);
-    const normalizedEmail = email ? normalizeEmail(email) : null;
     setUser(
       (normalizedEmail
         ? getAccountsSnapshot().find(
@@ -256,6 +281,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await storageRemoveItem(AUTH_STORAGE_KEY);
     setRole(null);
     setUser(null);
+    setThemeMode("light");
   };
 
   const registerUser = async (account: Omit<MockAccount, "role">) => {
@@ -285,8 +311,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const toggleThemeMode = async () => {
     const newTheme = themeMode === "light" ? "dark" : "light";
-    await storageSetItem(THEME_STORAGE_KEY, newTheme);
     setThemeMode(newTheme);
+    if (user) {
+      const userThemeKey =
+        USER_THEME_STORAGE_PREFIX + normalizeEmail(user.email);
+      await storageSetItem(userThemeKey, newTheme);
+    }
+  };
+
+  const updateUserPhoto = async (photo: string) => {
+    if (!user) return;
+
+    const nextAccounts = getAccountsSnapshot().map((account) =>
+      normalizeEmail(account.email) === normalizeEmail(user.email)
+        ? { ...account, photo }
+        : account,
+    );
+
+    mockAccountsStore = nextAccounts;
+    setAccounts(nextAccounts);
+    setUser({ ...user, photo });
+    await storageSetItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(nextAccounts));
   };
 
   return (
@@ -300,6 +345,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signOut,
         registerUser,
+        updateUserPhoto,
         themeMode,
         toggleThemeMode,
       }}

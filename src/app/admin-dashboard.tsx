@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome } from "@expo/vector-icons";
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -71,12 +71,40 @@ function formatCurrency(value: number) {
   });
 }
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+function BarChart({
+  data,
+  maxValue,
+  theme,
+}: {
+  data: Array<{ label: string; value: number }>;
+  maxValue: number;
+  theme: any;
+}) {
+  return (
+    <View style={styles.chartContainer}>
+      {data.map((item) => (
+        <View key={item.label} style={styles.barRow}>
+          <Text style={[styles.barLabel, { color: theme.textSecondary }]}>
+            {item.label}
+          </Text>
+          <View style={styles.barBackground}>
+            <View
+              style={[
+                styles.bar,
+                {
+                  backgroundColor: theme.text,
+                  width: `${Math.max((item.value / maxValue) * 100, 5)}%`,
+                },
+              ]}
+            />
+          </View>
+          <Text style={[styles.barValue, { color: theme.text }]}>
+            {formatCurrency(item.value)}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
 }
 
 export default function AdminDashboardScreen() {
@@ -101,20 +129,26 @@ export default function AdminDashboardScreen() {
     };
   });
 
-  const itemRanking = mockPurchases.reduce<Record<string, number>>(
-    (acc, purchase) => {
-      purchase.items.forEach((item) => {
-        acc[item.name] = (acc[item.name] ?? 0) + item.quantity;
-      });
-      return acc;
-    },
-    {},
-  );
+  const userChartData = purchasesByUser
+    .filter((u) => u.totalSpent > 0)
+    .map((u) => ({
+      label: u.user.name.split(" ")[0],
+      value: u.totalSpent,
+    }));
 
-  const topItems = Object.entries(itemRanking)
-    .sort((left, right) => right[1] - left[1])
-    .slice(0, 5)
-    .map(([name, quantity]) => ({ name, quantity }));
+  const maxUserSpent =
+    userChartData.length > 0
+      ? Math.max(...userChartData.map((d) => d.value))
+      : 1;
+
+  const monthlyData = [
+    { label: "Março", value: 120.5 },
+    { label: "Abril", value: 235.1 },
+    { label: "Maio", value: 360.0 },
+  ];
+
+  const maxMonthly =
+    monthlyData.length > 0 ? Math.max(...monthlyData.map((d) => d.value)) : 1;
 
   const stats = [
     { label: "Usuários", value: String(users.length), icon: "users" as const },
@@ -152,8 +186,7 @@ export default function AdminDashboardScreen() {
             Visão geral da operação
           </Text>
           <Text style={[styles.heroText, { color: theme.background }]}>
-            Acompanhe os usuários cadastrados, o histórico das compras e os
-            itens mais comprados em um único lugar.
+            Acompanhe usuários, compras e desempenho em tempo real.
           </Text>
         </View>
 
@@ -186,27 +219,19 @@ export default function AdminDashboardScreen() {
           ]}
         >
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Itens mais comprados
+            Faturamento por cliente
           </Text>
-          {topItems.map((item, index) => (
-            <View key={item.name} style={styles.rankingRow}>
-              <Text
-                style={[styles.rankingIndex, { color: theme.textSecondary }]}
-              >
-                {index + 1}
-              </Text>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.rankingName, { color: theme.text }]}>
-                  {item.name}
-                </Text>
-                <Text
-                  style={[styles.rankingMeta, { color: theme.textSecondary }]}
-                >
-                  {item.quantity} unidades vendidas
-                </Text>
-              </View>
-            </View>
-          ))}
+          {userChartData.length > 0 ? (
+            <BarChart
+              data={userChartData}
+              maxValue={maxUserSpent}
+              theme={theme}
+            />
+          ) : (
+            <Text style={[styles.emptyState, { color: theme.textSecondary }]}>
+              Sem compras registradas.
+            </Text>
+          )}
         </View>
 
         <View
@@ -216,81 +241,106 @@ export default function AdminDashboardScreen() {
           ]}
         >
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Usuários e compras
+            Tendência de compras
+          </Text>
+          <BarChart data={monthlyData} maxValue={maxMonthly} theme={theme} />
+        </View>
+
+        <View
+          style={[
+            styles.sectionCard,
+            { backgroundColor: theme.backgroundElement },
+          ]}
+        >
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            Usuários cadastrados
           </Text>
           <Text
             style={[styles.sectionDescription, { color: theme.textSecondary }]}
           >
-            Cada usuário aparece com seus pedidos registrados e o total gasto.
+            Todos os clientes registrados no sistema.
           </Text>
 
-          {purchasesByUser.map(({ user, purchases, totalSpent }) => (
-            <View
-              key={user.email}
-              style={[styles.userCard, { backgroundColor: theme.background }]}
-            >
-              <View style={styles.userHeader}>
-                <View style={styles.userAvatar}>
-                  <Feather name="user" size={18} color={theme.text} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.userName, { color: theme.text }]}>
-                    {user.name}
-                  </Text>
-                  <Text
-                    style={[styles.userEmail, { color: theme.textSecondary }]}
-                  >
-                    {user.email}
-                  </Text>
-                </View>
-                <Text style={[styles.userTotal, { color: theme.text }]}>
-                  {formatCurrency(totalSpent)}
-                </Text>
-              </View>
+          {users.map((user) => {
+            const userPurchases = mockPurchases.filter(
+              (p) => p.userEmail.toLowerCase() === user.email.toLowerCase(),
+            );
+            const userTotal = userPurchases.reduce((s, p) => s + p.total, 0);
 
-              {purchases.length > 0 ? (
-                purchases.map((purchase) => (
-                  <View key={purchase.id} style={styles.purchaseRow}>
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={[
-                          styles.purchaseDate,
-                          { color: theme.textSecondary },
-                        ]}
-                      >
-                        {formatDate(purchase.createdAt)}
+            return (
+              <View
+                key={user.email}
+                style={[styles.userCard, { backgroundColor: theme.background }]}
+              >
+                <View style={styles.userHeader}>
+                  <View
+                    style={[
+                      styles.userAvatar,
+                      { backgroundColor: user.photo ? "#E8D8B8" : "#D4A574" },
+                    ]}
+                  >
+                    {user.photo ? (
+                      <Text style={styles.photoPlaceholder}>
+                        {user.photo.slice(0, 2)}
                       </Text>
-                      <Text style={[styles.purchaseId, { color: theme.text }]}>
-                        Pedido {purchase.id}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.purchaseItems,
-                          { color: theme.textSecondary },
-                        ]}
-                      >
-                        {purchase.items
-                          .map((item) => `${item.name} x${item.quantity}`)
-                          .join(" · ")}
-                      </Text>
-                    </View>
-                    <Text style={[styles.purchaseTotal, { color: theme.text }]}>
-                      {formatCurrency(purchase.total)}
+                    ) : (
+                      <FontAwesome name="user" size={20} color={theme.text} />
+                    )}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.userName, { color: theme.text }]}>
+                      {user.name}
+                    </Text>
+                    <Text
+                      style={[styles.userEmail, { color: theme.textSecondary }]}
+                    >
+                      {user.email}
                     </Text>
                   </View>
-                ))
-              ) : (
-                <Text
+                  <View style={styles.userStats}>
+                    <Text style={[styles.userStat, { color: theme.text }]}>
+                      {userPurchases.length}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.userStatLabel,
+                        { color: theme.textSecondary },
+                      ]}
+                    >
+                      compras
+                    </Text>
+                  </View>
+                </View>
+
+                <View
                   style={[
-                    styles.emptyPurchases,
-                    { color: theme.textSecondary },
+                    styles.divider,
+                    { backgroundColor: theme.textSecondary + "20" },
                   ]}
-                >
-                  Nenhuma compra registrada para este usuário.
-                </Text>
-              )}
-            </View>
-          ))}
+                />
+
+                <View style={styles.userFooter}>
+                  <Text
+                    style={[
+                      styles.userTotalLabel,
+                      { color: theme.textSecondary },
+                    ]}
+                  >
+                    Total gasto
+                  </Text>
+                  <Text style={[styles.userTotalValue, { color: theme.text }]}>
+                    {formatCurrency(userTotal)}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+
+          {users.length === 0 && (
+            <Text style={[styles.emptyState, { color: theme.textSecondary }]}>
+              Nenhum usuário cadastrado.
+            </Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -332,34 +382,40 @@ const styles = StyleSheet.create({
   sectionCard: { borderRadius: 20, padding: 18, gap: 14 },
   sectionTitle: { fontSize: 18, fontWeight: "700", fontFamily: "serif" },
   sectionDescription: { fontSize: 14, lineHeight: 20 },
-  rankingRow: { flexDirection: "row", gap: 12, alignItems: "center" },
-  rankingIndex: { width: 24, fontSize: 14, fontWeight: "700" },
-  rankingName: { fontSize: 15, fontWeight: "700" },
-  rankingMeta: { fontSize: 13, marginTop: 2 },
-  userCard: { borderRadius: 18, padding: 14, gap: 12 },
+  chartContainer: { gap: 14 },
+  barRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  barLabel: { width: 60, fontSize: 13, fontWeight: "600" },
+  barBackground: {
+    flex: 1,
+    height: 24,
+    backgroundColor: "#E8D8B8",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  bar: { height: "100%", borderRadius: 8 },
+  barValue: { width: 80, fontSize: 13, fontWeight: "700", textAlign: "right" },
+  userCard: { borderRadius: 18, padding: 14, gap: 12, marginTop: 12 },
   userHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
   userAvatar: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     borderRadius: 12,
-    backgroundColor: "#E8D8B8",
     justifyContent: "center",
     alignItems: "center",
   },
+  photoPlaceholder: { fontSize: 14, fontWeight: "700", color: "#333" },
   userName: { fontSize: 15, fontWeight: "700" },
   userEmail: { fontSize: 13, marginTop: 2 },
-  userTotal: { fontSize: 14, fontWeight: "700" },
-  purchaseRow: {
+  userStats: { alignItems: "center", gap: 2 },
+  userStat: { fontSize: 16, fontWeight: "700", fontFamily: "serif" },
+  userStatLabel: { fontSize: 11, fontWeight: "600" },
+  divider: { height: 1 },
+  userFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
-    paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(0,0,0,0.08)",
+    alignItems: "center",
   },
-  purchaseDate: { fontSize: 12, fontWeight: "600" },
-  purchaseId: { fontSize: 14, fontWeight: "700", marginTop: 2 },
-  purchaseItems: { fontSize: 13, marginTop: 3, lineHeight: 18 },
-  purchaseTotal: { fontSize: 14, fontWeight: "700", alignSelf: "center" },
-  emptyPurchases: { fontSize: 13 },
+  userTotalLabel: { fontSize: 13, fontWeight: "600" },
+  userTotalValue: { fontSize: 16, fontWeight: "700", fontFamily: "serif" },
+  emptyState: { fontSize: 14, marginTop: 8 },
 });
