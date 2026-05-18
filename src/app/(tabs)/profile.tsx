@@ -2,11 +2,11 @@ import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../components/auth-context";
@@ -62,10 +62,6 @@ export default function ProfileScreen() {
         router.push("/login");
         return;
       }
-
-      if (role === "admin") {
-        router.replace("/admin");
-      }
     }, [isAuthenticated, isLoading, role, router]),
   );
 
@@ -76,7 +72,7 @@ export default function ProfileScreen() {
     router.replace("/login");
   };
 
-  if (isLoading || !isAuthenticated || role === "admin") return null;
+  if (isLoading || !isAuthenticated) return null;
 
   return (
     <SafeAreaView
@@ -135,47 +131,72 @@ export default function ProfileScreen() {
               {user?.email ?? "ingrid.souza@furg.br"}
             </Text>
             <Text style={[styles.roleBadge, { color: theme.textSecondary }]}>
-              Perfil: Usuário
+              Perfil: {role === "admin" ? "Administrador" : "Usuário"}
             </Text>
           </View>
 
           <View style={styles.profileMenu}>
-            <ProfileMenuItem
-              theme={theme}
-              icon={<Feather name="user" size={24} color={itemColor} />}
-              title="Dados Pessoais"
-              subtitle="Nome, email, CPF e telefone"
-              onPress={() => router.push("/personal-data")}
-            />
-            <ProfileMenuItem
-              theme={theme}
-              icon={<Feather name="shopping-bag" size={24} color={itemColor} />}
-              title="Meus Produtos"
-              subtitle="Produtos Ativos"
-              onPress={() => router.push("/user-products")}
-            />
-            <ProfileMenuItem
-              theme={theme}
-              icon={<Feather name="clipboard" size={24} color={itemColor} />}
-              title="Histórico de Compras"
-              subtitle="Ver últimas compras"
-              onPress={() => router.push("/purchase-history")}
-            />
-            <ProfileMenuItem
-              theme={theme}
-              icon={<Feather name="bell" size={24} color={itemColor} />}
-              title="Preferências de alerta"
-              subtitle="Horário e Canal"
-              onPress={() => router.push("/alert-preferences")}
-            />
+            {role === "admin" ? (
+              <>
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={<Feather name="layout" size={24} color={itemColor} />}
+                  title="Painel de Controle"
+                  subtitle="Estoque e usuários"
+                  onPress={() => router.push("/admin")}
+                />
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={<Feather name="grid" size={24} color={itemColor} />}
+                  title="Categorias"
+                  subtitle="Gerenciar itens e sessões públicas"
+                  onPress={() => router.push("/categories")}
+                />
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={<Feather name="user" size={24} color={itemColor} />}
+                  title="Dados Pessoais"
+                  subtitle="Nome, email, CPF e telefone"
+                  onPress={() => router.push("/personal-data")}
+                />
+              </>
+            ) : (
+              <>
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={<Feather name="user" size={24} color={itemColor} />}
+                  title="Dados Pessoais"
+                  subtitle="Nome, email, CPF e telefone"
+                  onPress={() => router.push("/personal-data")}
+                />
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={
+                    <Feather name="shopping-bag" size={24} color={itemColor} />
+                  }
+                  title="Meus Produtos"
+                  subtitle="Produtos Ativos"
+                  onPress={() => router.push("/user-products")}
+                />
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={
+                    <Feather name="clipboard" size={24} color={itemColor} />
+                  }
+                  title="Histórico de Compras"
+                  subtitle="Ver últimas compras"
+                  onPress={() => router.push("/purchase-history")}
+                />
 
-            <ProfileMenuItem
-              theme={theme}
-              icon={<Feather name="settings" size={24} color={itemColor} />}
-              title="Definições"
-              subtitle="App e segurança"
-              onPress={() => router.push("/settings")}
-            />
+                <ProfileMenuItem
+                  theme={theme}
+                  icon={<Feather name="settings" size={24} color={itemColor} />}
+                  title="Definições"
+                  subtitle="App e segurança"
+                  onPress={() => router.push("/settings")}
+                />
+              </>
+            )}
 
             <TouchableOpacity
               style={styles.logoutButton}

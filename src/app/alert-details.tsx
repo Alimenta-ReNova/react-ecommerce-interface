@@ -8,6 +8,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../components/auth-context";
 import BackHomeButton from "../components/back-home-button";
 import { useSafeStorage } from "../hooks/use-safe-storage";
 import { useTheme } from "../hooks/use-theme";
@@ -15,6 +16,7 @@ import { useTheme } from "../hooks/use-theme";
 export default function AlertDetails() {
   const theme = useTheme();
   const storage = useSafeStorage();
+  const { user } = useAuth();
 
   const [advanceDays, setAdvanceDays] = useState(3);
   const [remindToggle, setRemindToggle] = useState(true);
@@ -51,10 +53,11 @@ export default function AlertDetails() {
     Object.fromEntries(products.map((p) => [p.id, p.enabled])),
   );
 
-  const KEY_ADVANCE = "@renova:alerts-advance";
-  const KEY_REMIND = "@renova:alerts-remind";
-  const KEY_AVOID = "@renova:alerts-avoid";
-  const KEY_PRODUCTS = "@renova:alerts-products";
+  const userKey = user?.email || "guest";
+  const KEY_ADVANCE = `@renova:alerts-advance:${userKey}`;
+  const KEY_REMIND = `@renova:alerts-remind:${userKey}`;
+  const KEY_AVOID = `@renova:alerts-avoid:${userKey}`;
+  const KEY_PRODUCTS = `@renova:alerts-products:${userKey}`;
 
   useEffect(() => {
     (async () => {

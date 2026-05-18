@@ -1,11 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
+import { useAuth } from "../../components/auth-context";
 import { useTheme } from "../../hooks/use-theme";
 
 export default function TabLayout() {
   const theme = useTheme();
+  const { role, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (role === "admin") {
+    return <Redirect href="/admin" />;
+  }
 
   return (
     <Tabs

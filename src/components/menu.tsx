@@ -2,13 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // 1. Importe o router
 import React from "react";
 import {
-    Dimensions,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "./auth-context";
@@ -21,17 +21,23 @@ interface MenuProps {
 export default function Menu({ visible, onClose }: MenuProps) {
   const theme = useTheme();
   const router = useRouter(); // 2. Inicialize o router
-  const { user, signOut } = useAuth();
+  const { role, user, signOut } = useAuth();
 
-  // 3. Adicione o 'path' correspondente ao nome do arquivo/rota
-  const menuItems = [
+  const userMenuItems = [
     { label: "Inicio", path: "/", active: true },
     { label: "Categorias", path: "/categories", active: false },
     { label: "Alertas", path: "/(tabs)/alerts", active: false },
     { label: "Meu Perfil", path: "/(tabs)/profile", active: false },
-    { label: "Entre em contato", path: "/contact", active: false },
     { label: "Configurações", path: "/settings", active: false },
   ];
+
+  const adminMenuItems = [
+    { label: "Painel", path: "/admin", active: true },
+    { label: "Categorias", path: "/categories", active: false },
+    { label: "Perfil", path: "/profile", active: false },
+  ];
+
+  const menuItems = role === "admin" ? adminMenuItems : userMenuItems;
 
   // Função para navegar e fechar o menu ao mesmo tempo
   const navigateTo = (path: string) => {

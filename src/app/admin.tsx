@@ -2,27 +2,41 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../components/auth-context";
+import { useCatalog } from "../components/catalog-context";
 import BackHomeButton from "../components/back-home-button";
 import { useTheme } from "../hooks/use-theme";
-
-const adminCards = [
-  { title: "Usuários ativos", value: "128", icon: "users" as const },
-  { title: "Produtos cadastrados", value: "56", icon: "package" as const },
-  { title: "Alertas pendentes", value: "9", icon: "bell" as const },
-];
 
 export default function AdminScreen() {
   const router = useRouter();
   const theme = useTheme();
   const { isAuthenticated, isLoading, role, signOut } = useAuth();
+  const { categories } = useCatalog();
+  const totalItems = categories.reduce(
+    (sum, category) => sum + category.items.length,
+    0,
+  );
+
+  const adminCards = [
+    { title: "Usuários ativos", value: "128", icon: "users" as const },
+    {
+      title: "Categorias cadastradas",
+      value: String(categories.length),
+      icon: "grid" as const,
+    },
+    {
+      title: "Itens em estoque",
+      value: String(totalItems),
+      icon: "package" as const,
+    },
+  ];
 
   React.useEffect(() => {
     if (isLoading) {
@@ -77,10 +91,11 @@ export default function AdminScreen() {
       >
         <View style={[styles.hero, { backgroundColor: theme.text }]}>
           <Text style={[styles.heroTitle, { color: theme.background }]}>
-            Separação de acesso
+            Painel de estoque e usuários
           </Text>
           <Text style={[styles.heroText, { color: theme.background }]}>
-            O login agora distingue usuário comum e administrador.
+            Interface administrativa focada em controle de usuários, categorias
+            e itens disponíveis no catálogo público.
           </Text>
         </View>
 
@@ -107,12 +122,22 @@ export default function AdminScreen() {
           style={[styles.notice, { backgroundColor: theme.backgroundElement }]}
         >
           <Text style={[styles.noticeTitle, { color: theme.text }]}>
-            Próximos controles
+            Gerenciamento do catálogo
           </Text>
           <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
-            Aqui você pode ligar as telas de gestão de usuários, produtos e
-            relatórios quando quiser ampliar o painel.
+            As categorias e os itens visíveis para visitantes e clientes ficam
+            centralizados na tela pública de catálogo.
           </Text>
+          <TouchableOpacity
+            style={[styles.noticeButton, { backgroundColor: theme.text }]}
+            onPress={() => router.push("/categories")}
+          >
+            <Text
+              style={[styles.noticeButtonText, { color: theme.background }]}
+            >
+              Abrir catálogo
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -182,4 +207,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   noticeText: { fontSize: 14, lineHeight: 20 },
+  noticeButton: {
+    marginTop: 14,
+    borderRadius: 14,
+    minHeight: 46,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  noticeButtonText: { fontSize: 14, fontWeight: "700" },
 });

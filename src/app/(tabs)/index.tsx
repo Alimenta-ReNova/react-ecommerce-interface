@@ -1,132 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Menu from "../../components/menu";
+import { CatalogItem, useCatalog } from "../../components/catalog-context";
 import { Colors, Fonts, Spacing } from "../../constants/theme";
 import { useTheme } from "../../hooks/use-theme";
 
-interface Product {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-  label: string;
-  labelColor: string;
-}
-
-const selecionadosProducts: Product[] = [
-  {
-    id: "s1",
-    name: "Aveia",
-    color: "#D4A574",
-    icon: "leaf",
-    label: "Orgânico",
-    labelColor: "#6B5B4A",
-  },
-  {
-    id: "s2",
-    name: "Chia",
-    color: "#A67B87",
-    icon: "leaf",
-    label: "Premium",
-    labelColor: "#6B3E4E",
-  },
-  {
-    id: "s3",
-    name: "Linhaça",
-    color: "#8B7355",
-    icon: "leaf",
-    label: "Natural",
-    labelColor: "#5A4A3D",
-  },
-  {
-    id: "s4",
-    name: "Mel",
-    color: "#D4AF6A",
-    icon: "star",
-    label: "Popular",
-    labelColor: "#8B7355",
-  },
-];
-
-const recomendadosProducts: Product[] = [
-  {
-    id: "r1",
-    name: "Amendoim",
-    color: "#B8860B",
-    icon: "leaf",
-    label: "Orgânico",
-    labelColor: "#6B5B4A",
-  },
-  {
-    id: "r2",
-    name: "Granola",
-    color: "#CD853F",
-    icon: "leaf",
-    label: "Premium",
-    labelColor: "#6B3E4E",
-  },
-  {
-    id: "r3",
-    name: "Azeite",
-    color: "#8B7355",
-    icon: "leaf",
-    label: "Natural",
-    labelColor: "#5A4A3D",
-  },
-  {
-    id: "r4",
-    name: "Sementes",
-    color: "#A0826D",
-    icon: "star",
-    label: "Premium",
-    labelColor: "#6B5B4A",
-  },
-];
-
-const maisVendidosProducts: Product[] = [
-  {
-    id: "m1",
-    name: "Castanha",
-    color: "#8B6914",
-    icon: "leaf",
-    label: "Orgânico",
-    labelColor: "#5A4A3D",
-  },
-  {
-    id: "m2",
-    name: "Arroz",
-    color: "#A68064",
-    icon: "leaf",
-    label: "Premium",
-    labelColor: "#6B3E4E",
-  },
-  {
-    id: "m3",
-    name: "Feijão",
-    color: "#654321",
-    icon: "leaf",
-    label: "Natural",
-    labelColor: "#4A3A2D",
-  },
-  {
-    id: "m4",
-    name: "Lentilha",
-    color: "#A0826D",
-    icon: "star",
-    label: "Popular",
-    labelColor: "#6B5B4A",
-  },
-];
-
-const ProductCard = ({ product, theme }: { product: Product; theme: any }) => (
+const ProductCard = ({ product }: { product: CatalogItem }) => (
   <TouchableOpacity style={[styles.card, { backgroundColor: product.color }]}>
     <View style={styles.cardContent}>
       <Ionicons
@@ -144,17 +33,28 @@ const ProductCard = ({ product, theme }: { product: Product; theme: any }) => (
 
 const ProductRow = ({
   title,
+  subtitle,
   products,
   theme,
+  onPressCategory,
 }: {
   title: string;
-  products: Product[];
+  subtitle: string;
+  products: CatalogItem[];
   theme: any;
+  onPressCategory: () => void;
 }) => (
   <View style={styles.section}>
     <View style={styles.sectionHeader}>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text>
-      <TouchableOpacity style={styles.arrowCircle}>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          {title}
+        </Text>
+        <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
+          {subtitle}
+        </Text>
+      </View>
+      <TouchableOpacity style={styles.arrowCircle} onPress={onPressCategory}>
         <Ionicons name="chevron-forward" size={16} color={theme.text} />
       </TouchableOpacity>
     </View>
@@ -165,9 +65,9 @@ const ProductRow = ({
       contentContainerStyle={styles.horizontalScroll}
     >
       {products.map((p) => (
-        <ProductCard key={p.id} product={p} theme={theme} />
+        <ProductCard key={p.id} product={p} />
       ))}
-      <TouchableOpacity style={styles.seeMoreArrow}>
+      <TouchableOpacity style={styles.seeMoreArrow} onPress={onPressCategory}>
         <Ionicons name="chevron-forward" size={24} color={theme.text} />
       </TouchableOpacity>
     </ScrollView>
@@ -176,10 +76,14 @@ const ProductRow = ({
 
 export default function Home() {
   const [menuVisible, setMenuVisible] = useState(false);
+  const router = useRouter();
   const theme = useTheme();
+  const { categories } = useCatalog();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
       {/* Menu Lateral */}
       <Menu visible={menuVisible} onClose={() => setMenuVisible(false)} />
 
@@ -211,24 +115,18 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.mainScroll}
       >
-        {/* 2. USO DO COMPONENTE (Agora o nome bate com a definição acima) */}
-        <ProductRow
-          title="Selecionados"
-          products={selecionadosProducts}
-          theme={theme}
-        />
-        <ProductRow
-          title="Top's Recomendados"
-          products={recomendadosProducts}
-          theme={theme}
-        />
-        <ProductRow
-          title="Mais Vendidos"
-          products={maisVendidosProducts}
-          theme={theme}
-        />
+        {categories.map((category) => (
+          <ProductRow
+            key={category.id}
+            title={category.title}
+            subtitle={category.description}
+            products={category.items}
+            theme={theme}
+            onPressCategory={() => router.push("/categories")}
+          />
+        ))}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -272,6 +170,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts?.serif ?? "serif",
     color: Colors.light.text,
   },
+  sectionSubtitle: { fontSize: 13, marginTop: 2 },
   arrowCircle: {
     width: 28,
     height: 28,
