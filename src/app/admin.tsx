@@ -5,7 +5,6 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -15,44 +14,24 @@ import BackHomeButton from "../components/back-home-button";
 import { useCatalog } from "../components/catalog-context";
 import { useTheme } from "../hooks/use-theme";
 
+type AdminAction = {
+  title: string;
+  description: string;
+  icon: keyof typeof Feather.glyphMap;
+  href: string;
+};
+
 export default function AdminScreen() {
   const router = useRouter();
   const theme = useTheme();
-  const { accounts, isAuthenticated, isLoading, registerUser, role, signOut } =
-    useAuth();
+  const { accounts, isAuthenticated, isLoading, role, signOut } = useAuth();
   const { categories } = useCatalog();
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [cpf, setCpf] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [formError, setFormError] = React.useState("");
-  const [formSuccess, setFormSuccess] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  const users = accounts.filter((account) => account.role === "user");
   const totalItems = categories.reduce(
     (sum, category) => sum + category.items.length,
     0,
   );
-  const users = accounts.filter((account) => account.role === "user");
-
-  const adminCards = [
-    {
-      title: "Usuários cadastrados",
-      value: String(users.length),
-      icon: "users" as const,
-    },
-    {
-      title: "Categorias cadastradas",
-      value: String(categories.length),
-      icon: "grid" as const,
-    },
-    {
-      title: "Itens em estoque",
-      value: String(totalItems),
-      icon: "package" as const,
-    },
-  ];
 
   React.useEffect(() => {
     if (isLoading) {
@@ -73,54 +52,40 @@ export default function AdminScreen() {
     router.replace("/login");
   };
 
-  const handleCreateUser = async () => {
-    const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-    const trimmedCpf = cpf.trim();
-    const trimmedPhone = phone.trim();
-    const trimmedPassword = password.trim();
+  const actions: AdminAction[] = [
+    {
+      title: "Cadastro de usuários",
+      description: "Criar novas contas de clientes e revendedores.",
+      icon: "user-plus",
+      href: "/admin-users",
+    },
+    {
+      title: "Cadastro de estoque / catálogo",
+      description: "Adicionar e editar categorias e itens do catálogo.",
+      icon: "archive",
+      href: "/categories",
+    },
+    {
+      title: "Dashboard",
+      description: "Ver usuários, compras e itens mais comprados.",
+      icon: "bar-chart-2",
+      href: "/admin-dashboard",
+    },
+  ];
 
-    if (
-      !trimmedName ||
-      !trimmedEmail ||
-      !trimmedCpf ||
-      !trimmedPhone ||
-      !trimmedPassword
-    ) {
-      setFormError("Preencha todos os campos para cadastrar o usuário.");
-      setFormSuccess("");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setFormError("");
-
-    try {
-      await registerUser({
-        name: trimmedName,
-        email: trimmedEmail,
-        cpf: trimmedCpf,
-        phone: trimmedPhone,
-        password: trimmedPassword,
-      });
-
-      setName("");
-      setEmail("");
-      setCpf("");
-      setPhone("");
-      setPassword("");
-      setFormSuccess("Usuário cadastrado com sucesso.");
-    } catch (error) {
-      setFormSuccess("");
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível cadastrar o usuário.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const stats = [
+    { title: "Usuários", value: String(users.length), icon: "users" as const },
+    {
+      title: "Categorias",
+      value: String(categories.length),
+      icon: "grid" as const,
+    },
+    {
+      title: "Itens",
+      value: String(totalItems),
+      icon: "package" as const,
+    },
+  ];
 
   return (
     <SafeAreaView
@@ -134,9 +99,9 @@ export default function AdminScreen() {
 
         <View style={styles.headerCenter}>
           <Text style={[styles.kicker, { color: theme.textSecondary }]}>
-            Painel de controle
+            Admin
           </Text>
-          <Text style={[styles.title, { color: theme.text }]}>Admin</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Painel</Text>
         </View>
 
         <TouchableOpacity
@@ -156,192 +121,79 @@ export default function AdminScreen() {
       >
         <View style={[styles.hero, { backgroundColor: theme.text }]}>
           <Text style={[styles.heroTitle, { color: theme.background }]}>
-            Painel de estoque e usuários
+            Gestão administrativa
           </Text>
           <Text style={[styles.heroText, { color: theme.background }]}>
-            Interface administrativa focada em controle de usuários, categorias
-            e itens disponíveis no catálogo público.
+            Escolha o atalho que quer usar para cadastrar usuários, manter o
+            catálogo ou acompanhar a operação.
           </Text>
         </View>
 
-        {adminCards.map((card) => (
-          <View
-            key={card.title}
-            style={[styles.card, { backgroundColor: theme.backgroundElement }]}
-          >
-            <View style={styles.cardIconWrap}>
-              <Feather name={card.icon} size={22} color={theme.text} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.cardTitle, { color: theme.text }]}>
-                {card.title}
-              </Text>
-              <Text style={[styles.cardValue, { color: theme.textSecondary }]}>
-                {card.value}
-              </Text>
-            </View>
-          </View>
-        ))}
-
-        <View
-          style={[
-            styles.formCard,
-            { backgroundColor: theme.backgroundElement },
-          ]}
-        >
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Cadastrar usuário
-          </Text>
-          <Text style={[styles.sectionText, { color: theme.textSecondary }]}>
-            Crie novas contas de cliente sem sair do painel administrativo.
-          </Text>
-
-          <View
-            style={[styles.inputGroup, { backgroundColor: theme.background }]}
-          >
-            <Feather name="user" size={18} color={theme.textSecondary} />
-            <TextInput
-              placeholder="Nome completo"
-              value={name}
-              onChangeText={setName}
-              style={[styles.input, { color: theme.text }]}
-              placeholderTextColor={theme.textSecondary}
-            />
-          </View>
-
-          <View
-            style={[styles.inputGroup, { backgroundColor: theme.background }]}
-          >
-            <Feather name="mail" size={18} color={theme.textSecondary} />
-            <TextInput
-              placeholder="E-mail"
-              value={email}
-              onChangeText={setEmail}
-              style={[styles.input, { color: theme.text }]}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor={theme.textSecondary}
-            />
-          </View>
-
-          <View
-            style={[styles.inputGroup, { backgroundColor: theme.background }]}
-          >
-            <Feather name="shield" size={18} color={theme.textSecondary} />
-            <TextInput
-              placeholder="CPF"
-              value={cpf}
-              onChangeText={setCpf}
-              style={[styles.input, { color: theme.text }]}
-              placeholderTextColor={theme.textSecondary}
-            />
-          </View>
-
-          <View
-            style={[styles.inputGroup, { backgroundColor: theme.background }]}
-          >
-            <Feather name="phone" size={18} color={theme.textSecondary} />
-            <TextInput
-              placeholder="Telefone"
-              value={phone}
-              onChangeText={setPhone}
-              style={[styles.input, { color: theme.text }]}
-              keyboardType="phone-pad"
-              placeholderTextColor={theme.textSecondary}
-            />
-          </View>
-
-          <View
-            style={[styles.inputGroup, { backgroundColor: theme.background }]}
-          >
-            <Feather name="lock" size={18} color={theme.textSecondary} />
-            <TextInput
-              placeholder="Senha"
-              value={password}
-              onChangeText={setPassword}
-              style={[styles.input, { color: theme.text }]}
-              secureTextEntry
-              placeholderTextColor={theme.textSecondary}
-            />
-          </View>
-
-          {!!formError && (
-            <Text style={[styles.formMessage, { color: "#B42318" }]}>
-              {formError}
-            </Text>
-          )}
-
-          {!!formSuccess && (
-            <Text style={[styles.formMessage, { color: "#2E7D32" }]}>
-              {formSuccess}
-            </Text>
-          )}
-
-          <TouchableOpacity
-            style={[
-              styles.createButton,
-              { backgroundColor: theme.text, opacity: isSubmitting ? 0.7 : 1 },
-            ]}
-            onPress={handleCreateUser}
-            disabled={isSubmitting}
-          >
-            <Text
-              style={[styles.createButtonText, { color: theme.background }]}
+        <View style={styles.statsRow}>
+          {stats.map((stat) => (
+            <View
+              key={stat.title}
+              style={[
+                styles.statCard,
+                { backgroundColor: theme.backgroundElement },
+              ]}
             >
-              {isSubmitting ? "Cadastrando..." : "Cadastrar usuário"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={[styles.notice, { backgroundColor: theme.backgroundElement }]}
-        >
-          <Text style={[styles.noticeTitle, { color: theme.text }]}>
-            Usuários cadastrados
-          </Text>
-          <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
-            {users.length > 0
-              ? "As contas criadas pelo admin ficam disponíveis no login imediatamente."
-              : "Nenhum usuário foi cadastrado ainda."}
-          </Text>
-
-          {users.slice(0, 3).map((user) => (
-            <View key={user.email} style={styles.userRow}>
-              <View style={styles.userAvatar}>
-                <Feather name="user" size={18} color={theme.text} />
+              <View style={styles.statIconWrap}>
+                <Feather name={stat.icon} size={20} color={theme.text} />
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.userName, { color: theme.text }]}>
-                  {user.name}
-                </Text>
-                <Text style={[styles.userMeta, { color: theme.textSecondary }]}>
-                  {user.email}
-                </Text>
-              </View>
+              <Text style={[styles.statValue, { color: theme.text }]}>
+                {stat.value}
+              </Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                {stat.title}
+              </Text>
             </View>
           ))}
         </View>
 
+        {actions.map((action) => (
+          <TouchableOpacity
+            key={action.title}
+            style={[
+              styles.actionCard,
+              { backgroundColor: theme.backgroundElement },
+            ]}
+            onPress={() => router.push(action.href as any)}
+          >
+            <View style={styles.actionIconWrap}>
+              <Feather name={action.icon} size={22} color={theme.text} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.actionTitle, { color: theme.text }]}>
+                {action.title}
+              </Text>
+              <Text
+                style={[
+                  styles.actionDescription,
+                  { color: theme.textSecondary },
+                ]}
+              >
+                {action.description}
+              </Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.textSecondary}
+            />
+          </TouchableOpacity>
+        ))}
+
         <View
           style={[styles.notice, { backgroundColor: theme.backgroundElement }]}
         >
           <Text style={[styles.noticeTitle, { color: theme.text }]}>
-            Gerenciamento do catálogo
+            Resumo rápido
           </Text>
           <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
-            As categorias e os itens visíveis para visitantes e clientes ficam
-            centralizados na tela pública de catálogo.
+            O cadastro de usuários foi separado em uma tela própria, e o
+            catálogo continua na tela de categorias para edição do estoque.
           </Text>
-          <TouchableOpacity
-            style={[styles.noticeButton, { backgroundColor: theme.text }]}
-            onPress={() => router.push("/categories")}
-          >
-            <Text
-              style={[styles.noticeButtonText, { color: theme.background }]}
-            >
-              Abrir catálogo
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -381,14 +233,26 @@ const styles = StyleSheet.create({
   hero: { borderRadius: 28, padding: 22, gap: 8 },
   heroTitle: { fontSize: 22, fontWeight: "bold", fontFamily: "serif" },
   heroText: { fontSize: 15, lineHeight: 21 },
-  card: {
+  statsRow: { flexDirection: "row", gap: 10 },
+  statCard: { flex: 1, borderRadius: 18, padding: 14, gap: 8 },
+  statIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#E8D8B8",
+  },
+  statValue: { fontSize: 22, fontWeight: "bold", fontFamily: "serif" },
+  statLabel: { fontSize: 12, fontWeight: "600" },
+  actionCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 15,
+    gap: 14,
     borderRadius: 20,
-    padding: 16,
+    padding: 18,
   },
-  cardIconWrap: {
+  actionIconWrap: {
     width: 46,
     height: 46,
     borderRadius: 14,
@@ -396,56 +260,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#E8D8B8",
   },
-  cardTitle: { fontSize: 16, fontWeight: "700" },
-  cardValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 3,
-    fontFamily: "serif",
-  },
-  formCard: { borderRadius: 20, padding: 18, gap: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: "700", fontFamily: "serif" },
-  sectionText: { fontSize: 14, lineHeight: 20 },
-  inputGroup: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    minHeight: 50,
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    paddingVertical: 12,
-  },
-  formMessage: { fontSize: 13, fontWeight: "600", lineHeight: 18 },
-  createButton: {
-    marginTop: 2,
-    borderRadius: 14,
-    minHeight: 48,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  createButtonText: { fontSize: 14, fontWeight: "700" },
-  userRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 12,
-  },
-  userAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#E8D8B8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  userName: { fontSize: 15, fontWeight: "700" },
-  userMeta: { fontSize: 13, marginTop: 2 },
-  notice: { borderRadius: 20, padding: 18, marginTop: 8 },
+  actionTitle: { fontSize: 16, fontWeight: "700" },
+  actionDescription: { fontSize: 13, lineHeight: 18, marginTop: 3 },
+  notice: { borderRadius: 20, padding: 18 },
   noticeTitle: {
     fontSize: 18,
     fontWeight: "700",
@@ -453,13 +270,4 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   noticeText: { fontSize: 14, lineHeight: 20 },
-  noticeButton: {
-    marginTop: 14,
-    borderRadius: 14,
-    minHeight: 46,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  noticeButtonText: { fontSize: 14, fontWeight: "700" },
 });

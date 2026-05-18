@@ -12,6 +12,8 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="login" options={{ presentation: "modal" }} />
             <Stack.Screen name="admin" />
+            <Stack.Screen name="admin-users" />
+            <Stack.Screen name="admin-dashboard" />
             <Stack.Screen name="categories" />
             <Stack.Screen name="personal-data" />
             <Stack.Screen name="user-products" />
