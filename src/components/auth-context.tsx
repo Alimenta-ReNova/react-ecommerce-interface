@@ -187,14 +187,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const parsed = JSON.parse(storedRole) as AuthStorageValue;
 
             if (parsed && (parsed.role === "user" || parsed.role === "admin")) {
-              const storedEmail = parsed.email ? normalizeEmail(parsed.email) : null;
+              const storedEmail = parsed.email
+                ? normalizeEmail(parsed.email)
+                : null;
               const nextUser = storedEmail
-                ? nextAccounts.find(
+                ? (nextAccounts.find(
                     (account) =>
                       account.role === parsed.role &&
                       normalizeEmail(account.email) === storedEmail,
-                  ) ?? nextAccounts.find((account) => account.role === parsed.role) ?? null
-                : nextAccounts.find((account) => account.role === parsed.role) ?? null;
+                  ) ??
+                  nextAccounts.find(
+                    (account) => account.role === parsed.role,
+                  ) ??
+                  null)
+                : (nextAccounts.find(
+                    (account) => account.role === parsed.role,
+                  ) ?? null);
 
               setRole(parsed.role);
               setUser(nextUser);
@@ -203,7 +211,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (storedRole === "user" || storedRole === "admin") {
               setRole(storedRole);
               setUser(
-                nextAccounts.find((account) => account.role === storedRole) ?? null,
+                nextAccounts.find((account) => account.role === storedRole) ??
+                  null,
               );
             }
           }
@@ -223,7 +232,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (nextRole: UserRole, email?: string) => {
     await storageSetItem(
       AUTH_STORAGE_KEY,
-      JSON.stringify({ role: nextRole, email: email ? normalizeEmail(email) : undefined }),
+      JSON.stringify({
+        role: nextRole,
+        email: email ? normalizeEmail(email) : undefined,
+      }),
     );
     setRole(nextRole);
     const normalizedEmail = email ? normalizeEmail(email) : null;

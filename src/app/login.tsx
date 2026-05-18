@@ -38,11 +38,19 @@ export default function LoginScreen() {
   const handleSubmit = async () => {
     if (!isLogin) {
       if (selectedRole !== "user") {
-        setErrorMessage("Contas de administrador são criadas apenas no painel admin.");
+        setErrorMessage(
+          "Contas de administrador são criadas apenas no painel admin.",
+        );
         return;
       }
 
-      if (!name.trim() || !cpf.trim() || !phone.trim() || !email.trim() || !password.trim()) {
+      if (
+        !name.trim() ||
+        !cpf.trim() ||
+        !phone.trim() ||
+        !email.trim() ||
+        !password.trim()
+      ) {
         setErrorMessage("Preencha todos os campos para criar sua conta.");
         return;
       }
@@ -61,7 +69,9 @@ export default function LoginScreen() {
         return;
       } catch (error) {
         setErrorMessage(
-          error instanceof Error ? error.message : "Não foi possível criar a conta.",
+          error instanceof Error
+            ? error.message
+            : "Não foi possível criar a conta.",
         );
         return;
       }
