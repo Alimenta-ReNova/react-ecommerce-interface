@@ -1,20 +1,20 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
 import React, { useMemo, useRef, useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BackHomeButton from "../components/back-home-button";
 import { useAuth } from "../components/auth-context";
+import BackHomeButton from "../components/back-home-button";
 import {
-  CatalogCategory,
-  CatalogItem,
-  useCatalog,
+    CatalogCategory,
+    CatalogItem,
+    useCatalog,
 } from "../components/catalog-context";
 import { useTheme } from "../hooks/use-theme";
 
@@ -42,6 +42,14 @@ function ItemPreview({ item }: { item: CatalogItem }) {
       </View>
     </View>
   );
+}
+
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function CategoryPanel({
@@ -548,6 +556,7 @@ export default function CategoriesScreen() {
   } = useCatalog();
 
   const isAdmin = role === "admin";
+  const [searchQuery, setSearchQuery] = useState("");
   const [newCategory, setNewCategory] = useState({
     title: "",
     description: "",
@@ -560,6 +569,31 @@ export default function CategoriesScreen() {
     () => categories.reduce((sum, category) => sum + category.items.length, 0),
     [categories],
   );
+
+  const filteredCategories = useMemo(() => {
+    const query = normalizeText(searchQuery);
+
+    if (!query) {
+      return categories;
+    }
+
+    return categories
+      .map((category) => {
+        const categoryText = normalizeText(
+          `${category.title} ${category.description}`,
+        );
+        const matchedItems = category.items.filter((item) => {
+          const itemText = normalizeText(`${item.name} ${item.label}`);
+          return categoryText.includes(query) || itemText.includes(query);
+        });
+
+        return {
+          ...category,
+          items: matchedItems,
+        };
+      })
+      .filter((category) => category.items.length > 0);
+  }, [categories, searchQuery]);
 
   if (isLoading) {
     return null;
@@ -625,6 +659,22 @@ export default function CategoriesScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        <View
+          style={[
+            styles.searchBox,
+            { backgroundColor: theme.backgroundElement },
+          ]}
+        >
+          <Ionicons name="search" size={18} color={theme.textSecondary} />
+          <TextInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Pesquisar categoria ou item"
+            placeholderTextColor={theme.textSecondary}
+            style={[styles.searchInput, { color: theme.text }]}
+          />
         </View>
 
         {isAdmin && (
@@ -720,25 +770,38 @@ export default function CategoriesScreen() {
           </View>
         )}
 
-        {categories.map((category) => (
-          <CategoryPanel
-            key={category.id}
-            category={category}
-            theme={theme}
-            isAdmin={isAdmin}
-            onUpdateCategory={(categoryId, patch) =>
-              updateCategory(categoryId, patch)
-            }
-            onDeleteCategory={(categoryId) => deleteCategory(categoryId)}
-            onAddItem={(categoryId, item) => addItem(categoryId, item)}
-            onUpdateItem={(categoryId, itemId, patch) =>
-              updateItem(categoryId, itemId, patch)
-            }
-            onDeleteItem={(categoryId, itemId) =>
-              deleteItem(categoryId, itemId)
-            }
-          />
-        ))}
+        {filteredCategories.length > 0 ? (
+          filteredCategories.map((category) => (
+            <CategoryPanel
+              key={category.id}
+              category={category}
+              theme={theme}
+              isAdmin={isAdmin}
+              onUpdateCategory={(categoryId, patch) =>
+                updateCategory(categoryId, patch)
+              }
+              onDeleteCategory={(categoryId) => deleteCategory(categoryId)}
+              onAddItem={(categoryId, item) => addItem(categoryId, item)}
+              onUpdateItem={(categoryId, itemId, patch) =>
+                updateItem(categoryId, itemId, patch)
+              }
+              onDeleteItem={(categoryId, itemId) =>
+                deleteItem(categoryId, itemId)
+              }
+            />
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyTitle, { color: theme.text }]}>
+              Nada encontrado
+            </Text>
+            <Text
+              style={[styles.emptySubtitle, { color: theme.textSecondary }]}
+            >
+              Tente pesquisar por um nome de categoria, item ou etiqueta.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -789,6 +852,35 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   adminComposer: { borderRadius: 24, padding: 18, gap: 10 },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    fontFamily: "serif",
+    textAlign: "center",
+  },
+  emptySubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
+  },
   categoryCard: { borderRadius: 24, padding: 18, gap: 14 },
   categoryHeader: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   categorySwatch: { width: 14, height: 44, borderRadius: 999 },
