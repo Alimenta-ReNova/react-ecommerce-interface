@@ -18,7 +18,7 @@ import {
     validateMockCredentials,
 } from "../components/auth-context";
 import BackHomeButton from "../components/back-home-button";
-import { Fonts, Spacing } from "../constants/theme";
+import { AppAssets, Fonts, Spacing } from "../constants/theme";
 import { useTheme } from "../hooks/use-theme";
 
 export default function LoginScreen() {
@@ -124,7 +124,7 @@ export default function LoginScreen() {
 
         <View style={styles.header}>
           <Image
-            source={require("../../assets/images/logo-glow.png")}
+            source={AppAssets.logos.glow}
             style={styles.logo}
             resizeMode="contain"
           />

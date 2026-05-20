@@ -6,7 +6,7 @@ import { StyleSheet } from "react-native";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
 
-import { Spacing } from "@/constants/theme";
+import { AppAssets, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
 export function WebBadge() {
@@ -24,8 +24,8 @@ export function WebBadge() {
       <Image
         source={
           theme.background === "#0F0B08"
-            ? require("@/assets/images/expo-badge-white.png")
-            : require("@/assets/images/expo-badge.png")
+            ? AppAssets.badges.expoWhite
+            : AppAssets.badges.expo
         }
         style={styles.badgeImage}
       />
