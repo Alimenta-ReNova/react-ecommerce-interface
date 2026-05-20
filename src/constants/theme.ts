@@ -22,6 +22,21 @@ export const Colors = {
   },
 } as const;
 
+export const AppAssets = {
+  logos: {
+    glow: require("../../assets/images/logo-glow.png"),
+    expo: require("../../assets/images/expo-logo.png"),
+  },
+  badges: {
+    expo: require("../../assets/images/expo-badge.png"),
+    expoWhite: require("../../assets/images/expo-badge-white.png"),
+  },
+  tabs: {
+    home: require("../../assets/images/tabIcons/home.png"),
+    explore: require("../../assets/images/tabIcons/explore.png"),
+  },
+} as const;
+
 /**
  * Fontes (Adicionadas para corrigir o erro 'mono' of undefined)
  */
@@ -51,6 +66,13 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+} as const;
+
+export const AppTheme = {
+  colors: Colors,
+  fonts: Fonts,
+  assets: AppAssets,
+  spacing: Spacing,
 } as const;
 
 // Constantes auxiliares que o template do Expo pode usar

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -10,8 +10,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Menu from "../../components/menu";
 import { CatalogItem, useCatalog } from "../../components/catalog-context";
+import Menu from "../../components/menu";
 import { Colors, Fonts, Spacing } from "../../constants/theme";
 import { useTheme } from "../../hooks/use-theme";
 
@@ -74,11 +74,45 @@ const ProductRow = ({
   </View>
 );
 
+function normalizeText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export default function Home() {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const theme = useTheme();
   const { categories } = useCatalog();
+
+  const filteredCategories = useMemo(() => {
+    const query = normalizeText(searchQuery);
+
+    if (!query) {
+      return categories;
+    }
+
+    return categories
+      .map((category) => {
+        const matchedItems = category.items.filter((item) => {
+          const searchableText = normalizeText(
+            `${item.name} ${item.label} ${category.title} ${category.description}`,
+          );
+
+          return searchableText.includes(query);
+        });
+
+        return {
+          ...category,
+          items: matchedItems,
+        };
+      })
+      .filter((category) => category.items.length > 0);
+  }, [categories, searchQuery]);
 
   return (
     <SafeAreaView
@@ -105,6 +139,8 @@ export default function Home() {
           <TextInput
             placeholder="Pesquisar"
             placeholderTextColor={theme.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
             style={[styles.input, { color: theme.text }]}
           />
           <Ionicons name="search" size={20} color={theme.text} />
@@ -115,16 +151,29 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.mainScroll}
       >
-        {categories.map((category) => (
-          <ProductRow
-            key={category.id}
-            title={category.title}
-            subtitle={category.description}
-            products={category.items}
-            theme={theme}
-            onPressCategory={() => router.push("/categories")}
-          />
-        ))}
+        {filteredCategories.length > 0 ? (
+          filteredCategories.map((category) => (
+            <ProductRow
+              key={category.id}
+              title={category.title}
+              subtitle={category.description}
+              products={category.items}
+              theme={theme}
+              onPressCategory={() => router.push("/categories")}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyTitle, { color: theme.text }]}>
+              Nenhum item encontrado
+            </Text>
+            <Text
+              style={[styles.emptySubtitle, { color: theme.textSecondary }]}
+            >
+              Tente pesquisar por nome, categoria ou etiqueta.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -156,6 +205,23 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, fontSize: 16, fontFamily: Fonts?.sans ?? "normal" },
   mainScroll: { paddingBottom: 100 },
+  emptyState: {
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.four,
+    alignItems: "center",
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    fontFamily: Fonts?.serif ?? "serif",
+    textAlign: "center",
+  },
+  emptySubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+  },
   section: { marginBottom: Spacing.four },
   sectionHeader: {
     flexDirection: "row",

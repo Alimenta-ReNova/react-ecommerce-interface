@@ -2,41 +2,36 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../components/auth-context";
-import { useCatalog } from "../components/catalog-context";
 import BackHomeButton from "../components/back-home-button";
+import { useCatalog } from "../components/catalog-context";
 import { useTheme } from "../hooks/use-theme";
+
+type AdminAction = {
+  title: string;
+  description: string;
+  icon: keyof typeof Feather.glyphMap;
+  href: string;
+};
 
 export default function AdminScreen() {
   const router = useRouter();
   const theme = useTheme();
-  const { isAuthenticated, isLoading, role, signOut } = useAuth();
+  const { accounts, isAuthenticated, isLoading, role, signOut } = useAuth();
   const { categories } = useCatalog();
+
+  const users = accounts.filter((account) => account.role === "user");
   const totalItems = categories.reduce(
     (sum, category) => sum + category.items.length,
     0,
   );
-
-  const adminCards = [
-    { title: "Usuários ativos", value: "128", icon: "users" as const },
-    {
-      title: "Categorias cadastradas",
-      value: String(categories.length),
-      icon: "grid" as const,
-    },
-    {
-      title: "Itens em estoque",
-      value: String(totalItems),
-      icon: "package" as const,
-    },
-  ];
 
   React.useEffect(() => {
     if (isLoading) {
@@ -57,6 +52,41 @@ export default function AdminScreen() {
     router.replace("/login");
   };
 
+  const actions: AdminAction[] = [
+    {
+      title: "Cadastro de usuários",
+      description: "Criar novas contas de clientes e revendedores.",
+      icon: "user-plus",
+      href: "/admin-users",
+    },
+    {
+      title: "Cadastro de estoque / catálogo",
+      description: "Adicionar e editar categorias e itens do catálogo.",
+      icon: "archive",
+      href: "/categories",
+    },
+    {
+      title: "Dashboard",
+      description: "Ver usuários, compras e itens mais comprados.",
+      icon: "bar-chart-2",
+      href: "/admin-dashboard",
+    },
+  ];
+
+  const stats = [
+    { title: "Usuários", value: String(users.length), icon: "users" as const },
+    {
+      title: "Categorias",
+      value: String(categories.length),
+      icon: "grid" as const,
+    },
+    {
+      title: "Itens",
+      value: String(totalItems),
+      icon: "package" as const,
+    },
+  ];
+
   return (
     <SafeAreaView
       style={[styles.safeArea, { backgroundColor: theme.background }]}
@@ -69,9 +99,9 @@ export default function AdminScreen() {
 
         <View style={styles.headerCenter}>
           <Text style={[styles.kicker, { color: theme.textSecondary }]}>
-            Painel de controle
+            Admin
           </Text>
-          <Text style={[styles.title, { color: theme.text }]}>Admin</Text>
+          <Text style={[styles.title, { color: theme.text }]}>Painel</Text>
         </View>
 
         <TouchableOpacity
@@ -91,53 +121,79 @@ export default function AdminScreen() {
       >
         <View style={[styles.hero, { backgroundColor: theme.text }]}>
           <Text style={[styles.heroTitle, { color: theme.background }]}>
-            Painel de estoque e usuários
+            Gestão administrativa
           </Text>
           <Text style={[styles.heroText, { color: theme.background }]}>
-            Interface administrativa focada em controle de usuários, categorias
-            e itens disponíveis no catálogo público.
+            Escolha o atalho que quer usar para cadastrar usuários, manter o
+            catálogo ou acompanhar a operação.
           </Text>
         </View>
 
-        {adminCards.map((card) => (
-          <View
-            key={card.title}
-            style={[styles.card, { backgroundColor: theme.backgroundElement }]}
+        <View style={styles.statsRow}>
+          {stats.map((stat) => (
+            <View
+              key={stat.title}
+              style={[
+                styles.statCard,
+                { backgroundColor: theme.backgroundElement },
+              ]}
+            >
+              <View style={styles.statIconWrap}>
+                <Feather name={stat.icon} size={20} color={theme.text} />
+              </View>
+              <Text style={[styles.statValue, { color: theme.text }]}>
+                {stat.value}
+              </Text>
+              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                {stat.title}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {actions.map((action) => (
+          <TouchableOpacity
+            key={action.title}
+            style={[
+              styles.actionCard,
+              { backgroundColor: theme.backgroundElement },
+            ]}
+            onPress={() => router.push(action.href as any)}
           >
-            <View style={styles.cardIconWrap}>
-              <Feather name={card.icon} size={22} color={theme.text} />
+            <View style={styles.actionIconWrap}>
+              <Feather name={action.icon} size={22} color={theme.text} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.cardTitle, { color: theme.text }]}>
-                {card.title}
+              <Text style={[styles.actionTitle, { color: theme.text }]}>
+                {action.title}
               </Text>
-              <Text style={[styles.cardValue, { color: theme.textSecondary }]}>
-                {card.value}
+              <Text
+                style={[
+                  styles.actionDescription,
+                  { color: theme.textSecondary },
+                ]}
+              >
+                {action.description}
               </Text>
             </View>
-          </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.textSecondary}
+            />
+          </TouchableOpacity>
         ))}
 
         <View
           style={[styles.notice, { backgroundColor: theme.backgroundElement }]}
         >
           <Text style={[styles.noticeTitle, { color: theme.text }]}>
-            Gerenciamento do catálogo
+            Resumo rápido
           </Text>
           <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
-            As categorias e os itens visíveis para visitantes e clientes ficam
-            centralizados na tela pública de catálogo.
+            O cadastro de usuários foi separado em uma tela própria, e o
+            catálogo continua na tela de categorias para edição do estoque.
           </Text>
-          <TouchableOpacity
-            style={[styles.noticeButton, { backgroundColor: theme.text }]}
-            onPress={() => router.push("/categories")}
-          >
-            <Text
-              style={[styles.noticeButtonText, { color: theme.background }]}
-            >
-              Abrir catálogo
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -177,14 +233,26 @@ const styles = StyleSheet.create({
   hero: { borderRadius: 28, padding: 22, gap: 8 },
   heroTitle: { fontSize: 22, fontWeight: "bold", fontFamily: "serif" },
   heroText: { fontSize: 15, lineHeight: 21 },
-  card: {
+  statsRow: { flexDirection: "row", gap: 10 },
+  statCard: { flex: 1, borderRadius: 18, padding: 14, gap: 8 },
+  statIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#E8D8B8",
+  },
+  statValue: { fontSize: 22, fontWeight: "bold", fontFamily: "serif" },
+  statLabel: { fontSize: 12, fontWeight: "600" },
+  actionCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 15,
+    gap: 14,
     borderRadius: 20,
-    padding: 16,
+    padding: 18,
   },
-  cardIconWrap: {
+  actionIconWrap: {
     width: 46,
     height: 46,
     borderRadius: 14,
@@ -192,14 +260,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#E8D8B8",
   },
-  cardTitle: { fontSize: 16, fontWeight: "700" },
-  cardValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 3,
-    fontFamily: "serif",
-  },
-  notice: { borderRadius: 20, padding: 18, marginTop: 8 },
+  actionTitle: { fontSize: 16, fontWeight: "700" },
+  actionDescription: { fontSize: 13, lineHeight: 18, marginTop: 3 },
+  notice: { borderRadius: 20, padding: 18 },
   noticeTitle: {
     fontSize: 18,
     fontWeight: "700",
@@ -207,13 +270,4 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   noticeText: { fontSize: 14, lineHeight: 20 },
-  noticeButton: {
-    marginTop: 14,
-    borderRadius: 14,
-    minHeight: 46,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  noticeButtonText: { fontSize: 14, fontWeight: "700" },
 });

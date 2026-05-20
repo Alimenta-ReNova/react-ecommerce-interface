@@ -2,11 +2,13 @@ import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../components/auth-context";
@@ -48,9 +50,11 @@ const ProfileMenuItem = ({
 
 export default function ProfileScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [photoLoading, setPhotoLoading] = useState(false);
   const theme = useTheme();
   const router = useRouter();
-  const { isAuthenticated, isLoading, role, signOut, user } = useAuth();
+  const { isAuthenticated, isLoading, role, signOut, user, updateUserPhoto } =
+    useAuth();
 
   useFocusEffect(
     useCallback(() => {
@@ -67,12 +71,128 @@ export default function ProfileScreen() {
 
   const itemColor = theme.text;
 
+  const getImagePicker = async () => {
+    try {
+      return await import("expo-image-picker");
+    } catch {
+      return null;
+    }
+  };
+
+  const handlePickPhoto = async () => {
+    try {
+      setPhotoLoading(true);
+      const ImagePicker = await getImagePicker();
+
+      if (!ImagePicker) {
+        Alert.alert(
+          "Indisponível",
+          "O seletor de imagens não está disponível nesta instalação.",
+        );
+        return;
+      }
+
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert(
+          "Permissão necessária",
+          "Ative o acesso à galeria para selecionar uma foto.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        base64: true,
+      });
+
+      const selectedPhoto = result.assets?.[0]?.base64;
+
+      if (!result.canceled && selectedPhoto) {
+        await updateUserPhoto(selectedPhoto);
+        Alert.alert("Sucesso", "Foto atualizada com sucesso!");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível atualizar a foto.");
+      console.error(error);
+    } finally {
+      setPhotoLoading(false);
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      setPhotoLoading(true);
+      const ImagePicker = await getImagePicker();
+
+      if (!ImagePicker) {
+        Alert.alert(
+          "Indisponível",
+          "A câmera não está disponível nesta instalação.",
+        );
+        return;
+      }
+
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert(
+          "Permissão necessária",
+          "Ative o acesso à câmera para tirar uma foto.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        base64: true,
+      });
+
+      const selectedPhoto = result.assets?.[0]?.base64;
+
+      if (!result.canceled && selectedPhoto) {
+        await updateUserPhoto(selectedPhoto);
+        Alert.alert("Sucesso", "Foto atualizada com sucesso!");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível tirar uma foto.");
+      console.error(error);
+    } finally {
+      setPhotoLoading(false);
+    }
+  };
+
+  const handlePhotoPress = () => {
+    Alert.alert("Foto do perfil", "Escolha uma opção:", [
+      {
+        text: "Tirar foto",
+        onPress: handleTakePhoto,
+      },
+      {
+        text: "Escolher da galeria",
+        onPress: handlePickPhoto,
+      },
+      { text: "Cancelar", style: "cancel" },
+    ]);
+  };
+
   const handleLogout = async () => {
     await signOut();
     router.replace("/login");
   };
 
   if (isLoading || !isAuthenticated) return null;
+
+  const photoUrl = user?.photo
+    ? `data:image/jpeg;base64,${user.photo}`
+    : undefined;
 
   return (
     <SafeAreaView
@@ -110,19 +230,32 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.profileHeader}>
-            <View
-              style={[styles.avatarContainer, { backgroundColor: "#E8D8B8" }]}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handlePhotoPress}
+              disabled={photoLoading}
             >
-              <FontAwesome name="user" size={50} color={itemColor} />
-              <TouchableOpacity
-                style={[
-                  styles.cameraIconContainer,
-                  { backgroundColor: "#E8D8B8" },
-                ]}
+              <View
+                style={[styles.avatarContainer, { backgroundColor: "#E8D8B8" }]}
               >
-                <FontAwesome name="camera" size={16} color={itemColor} />
-              </TouchableOpacity>
-            </View>
+                {photoUrl ? (
+                  <Image
+                    source={{ uri: photoUrl }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <FontAwesome name="user" size={50} color={itemColor} />
+                )}
+                <View
+                  style={[
+                    styles.cameraIconContainer,
+                    { backgroundColor: "#E8D8B8" },
+                  ]}
+                >
+                  <FontAwesome name="camera" size={16} color={itemColor} />
+                </View>
+              </View>
+            </TouchableOpacity>
 
             <Text style={[styles.profileName, { color: theme.text }]}>
               {user?.name ?? "Ingrid Souza"}
@@ -246,6 +379,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   cameraIconContainer: {
     position: "absolute",

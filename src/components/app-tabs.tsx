@@ -1,6 +1,7 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import React from "react";
 
+import { AppAssets } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
 export default function AppTabs() {
@@ -15,7 +16,7 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/home.png")}
+          src={AppAssets.tabs.home}
           renderingMode="template"
         />
       </NativeTabs.Trigger>
@@ -23,7 +24,7 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="explore">
         <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/explore.png")}
+          src={AppAssets.tabs.explore}
           renderingMode="template"
         />
       </NativeTabs.Trigger>
