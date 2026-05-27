@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import mockAccountsData from "../data/mock-accounts.json";
 
 // Lazy-load AsyncStorage to avoid native module crash in Expo Go
 type AsyncStorageType = {
@@ -57,24 +58,9 @@ export type MockAccount = {
   photo?: string;
 };
 
-const seededMockAccounts: MockAccount[] = [
-  {
-    role: "user",
-    name: "Ingrid Souza",
-    email: "ingrid.souza@furg.br",
-    password: "user123",
-    cpf: "123.456.789-00",
-    phone: "(53) 9xxxx-xxxx",
-  },
-  {
-    role: "admin",
-    name: "Carlos Admin",
-    email: "admin@renova.com",
-    password: "admin123",
-    cpf: "987.654.321-00",
-    phone: "(53) 9yyyy-yyyy",
-  },
-];
+const seededMockAccounts: MockAccount[] = Array.isArray(mockAccountsData)
+  ? (mockAccountsData as MockAccount[])
+  : [];
 
 let mockAccountsStore: MockAccount[] = [...seededMockAccounts];
 

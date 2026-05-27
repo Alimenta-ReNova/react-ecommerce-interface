@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import mockCatalogData from "../data/mock-catalog.json";
 
 type AsyncStorageType = {
   getItem: (key: string) => Promise<string | null>;
@@ -75,128 +76,9 @@ type CatalogContextValue = {
 
 const CATALOG_STORAGE_KEY = "@renova:catalog";
 
-const DEFAULT_CATEGORIES: CatalogCategory[] = [
-  {
-    id: "cat-selected",
-    title: "Selecionados",
-    description: "Itens em destaque para a vitrine principal.",
-    accentColor: "#D4A574",
-    items: [
-      {
-        id: "item-oat",
-        name: "Aveia",
-        color: "#D4A574",
-        icon: "leaf",
-        label: "Orgânico",
-        labelColor: "#6B5B4A",
-      },
-      {
-        id: "item-chia",
-        name: "Chia",
-        color: "#A67B87",
-        icon: "leaf",
-        label: "Premium",
-        labelColor: "#6B3E4E",
-      },
-      {
-        id: "item-flax",
-        name: "Linhaça",
-        color: "#8B7355",
-        icon: "leaf",
-        label: "Natural",
-        labelColor: "#5A4A3D",
-      },
-      {
-        id: "item-honey",
-        name: "Mel",
-        color: "#D4AF6A",
-        icon: "star",
-        label: "Popular",
-        labelColor: "#8B7355",
-      },
-    ],
-  },
-  {
-    id: "cat-recommended",
-    title: "Recomendados",
-    description: "Sugestões que combinam com o perfil do cliente.",
-    accentColor: "#A67B87",
-    items: [
-      {
-        id: "item-peanut",
-        name: "Amendoim",
-        color: "#B8860B",
-        icon: "leaf",
-        label: "Orgânico",
-        labelColor: "#6B5B4A",
-      },
-      {
-        id: "item-granola",
-        name: "Granola",
-        color: "#CD853F",
-        icon: "leaf",
-        label: "Premium",
-        labelColor: "#6B3E4E",
-      },
-      {
-        id: "item-olive-oil",
-        name: "Azeite",
-        color: "#8B7355",
-        icon: "leaf",
-        label: "Natural",
-        labelColor: "#5A4A3D",
-      },
-      {
-        id: "item-seeds",
-        name: "Sementes",
-        color: "#A0826D",
-        icon: "star",
-        label: "Premium",
-        labelColor: "#6B5B4A",
-      },
-    ],
-  },
-  {
-    id: "cat-best-sellers",
-    title: "Mais Vendidos",
-    description: "Os produtos com maior saída da loja.",
-    accentColor: "#8B6914",
-    items: [
-      {
-        id: "item-cashew",
-        name: "Castanha",
-        color: "#8B6914",
-        icon: "leaf",
-        label: "Orgânico",
-        labelColor: "#5A4A3D",
-      },
-      {
-        id: "item-rice",
-        name: "Arroz",
-        color: "#A68064",
-        icon: "leaf",
-        label: "Premium",
-        labelColor: "#6B3E4E",
-      },
-      {
-        id: "item-beans",
-        name: "Feijão",
-        color: "#654321",
-        icon: "leaf",
-        label: "Natural",
-        labelColor: "#4A3A2D",
-      },
-      {
-        id: "item-lentils",
-        name: "Lentilha",
-        color: "#A0826D",
-        icon: "star",
-        label: "Popular",
-        labelColor: "#6B5B4A",
-      },
-    ],
-  },
-];
+const DEFAULT_CATEGORIES: CatalogCategory[] = Array.isArray(mockCatalogData)
+  ? (mockCatalogData as CatalogCategory[])
+  : [];
 
 function createId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
