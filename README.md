@@ -99,20 +99,48 @@ Com base na arquitetura atual do projeto:
 
 ---
 
+
 ## 🛠️ Como Executar o Projeto
 
-Clonar o repositório:
+Antes de começar, você precisará ter instalado em sua máquina as seguintes ferramentas:
+* [Node.js](https://nodejs.org/) (versão LTS recomendada)
+* [Android Studio](https://developer.android.com/studio) (necessário para configurar o emulador Android)
 
-```text
-git clone [https://github.com/Alimenta-ReNova/react-ecommerce-interface.git]
+### ⚙️ Configuração do Ambiente
+
+Para garantir que o Expo e o Android Studio se comuniquem perfeitamente, siga o guia oficial de configuração de ambiente:
+👉 [Documentação do Expo - Configuração de Ambiente para Android](https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=simulated&mode=development-build)
+
+> 💡 **Dica:** Certifique-se de configurar corretamente as variáveis de ambiente (como `ANDROID_HOME`) conforme indicado no guia acima para evitar erros ao iniciar o emulador.
+
+---
+
+### 🚀 Passos para Execução
+
+Com o ambiente configurado, siga os comandos abaixo no terminal:
+
+1. **Clonar o repositório:**
+   ```bash
+   git clone [https://github.com/Alimenta-ReNova/react-ecommerce-interface.git]
+Acessar a pasta do projeto:
+
+````Bash
+cd react-ecommerce-interface
 ````
 Instalar as dependências:
-```text
+````
+Bash
 npm install
 ````
 Iniciar o ambiente Expo:
-```text
+````
+Bash
 npx expo start -c
 ````
 
-Utilize o QR Code no app Expo Go para testar no seu dispositivo físico.
+###📱 Como Testar
+Após rodar o comando npx expo start -c, o terminal exibirá um QR Code. Você pode testar o aplicativo de duas formas:
+
+No Dispositivo Físico: Instale o aplicativo Expo Go (disponível na Play Store), abra o app e escaneie o QR Code exibido no terminal.
+
+No Emulador (Android): Abra o Android Studio, inicie o seu dispositivo virtual (AVD) e, no terminal onde o Expo está rodando, pressione a tecla a para abrir o projeto diretamente no emulador.
